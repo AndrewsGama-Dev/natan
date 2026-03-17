@@ -1,0 +1,24 @@
+# Copie para .config e preencha com seus dados.
+# NUNCA commite o arquivo .config no Git (contém senhas e tokens).
+
+[APISOURCE]
+# Token Bearer da API Alterdata (Folha de Pagamento)
+token = "SEU_TOKEN_ALTERDATA"
+
+[APITARGET]
+# API de destino (IFPonto/Hevi) - cadastro em massa via CSV
+url = https://sua-api-ifponto.com/endpoint
+integracao = usuario_integracao
+# Token é gerado como SHA256(token_base + DD/MM/AAAA)
+token_base = sua_chave_secreta
+
+[SOAP]
+# Web service SOAP do IFPonto (demissões)
+url = https://seu-servidor-ifponto.com/soap
+client_id = SEU_CLIENT_ID
+usuario = usuario_soap
+senha = senha_soap
+
+[FUNCIONARIOS]
+# Campo chave para identificação: matricula ou cpf
+campo_chave = matricula

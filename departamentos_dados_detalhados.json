@@ -1,0 +1,944 @@
+{
+  "departamentos_extraidos": {
+    "1": {
+      "id": "1",
+      "codigo": "ZZZG7E950E10030708105B93FB1B3FDBB7",
+      "nome": "ADMINISTRATIVO",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "34",
+          "nome": "GENIVON DA SILVA LOPES"
+        },
+        {
+          "id": "35",
+          "nome": "MARIA DO PERPETUO SOCORRO DE LIMA GOMES"
+        },
+        {
+          "id": "37",
+          "nome": "ODEMIRA BRITO CORREA"
+        }
+      ],
+      "empresa_id": "265"
+    },
+    "2": {
+      "id": "2",
+      "codigo": "ZZZG7E950E10100433F089EFA5D04A33B7",
+      "nome": "CONSERVAÇÃO E LIMPEZA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "36",
+          "nome": "MICHAEL OLIVEIRA DOS SANTOS"
+        }
+      ],
+      "empresa_id": "265"
+    },
+    "34": {
+      "id": "34",
+      "codigo": "ZZZG7E911C083A2933F04FF8A8269E2062",
+      "nome": "NOVO ALEIXO",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "68",
+          "nome": "FLAVIA CRISLANE DAMASCENO DA SILVA"
+        },
+        {
+          "id": "69",
+          "nome": "RANDRESON FERNANDES DA SILVA"
+        },
+        {
+          "id": "73",
+          "nome": "ALCILEIA UANDRE DA GAMA"
+        }
+      ],
+      "empresa_id": "167"
+    },
+    "36": {
+      "id": "36",
+      "codigo": "ZZZG7E91140C1A0812C0897EB797AD8888",
+      "nome": "MATRIZ AV DAS TORRES",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "328",
+          "nome": "LAERCIO ALVES DA SILVA JUNIOR"
+        },
+        {
+          "id": "329",
+          "nome": "ALEXANDRE ALFAIA DA SILVA"
+        },
+        {
+          "id": "330",
+          "nome": "AYUMI DE SENNA SILVA"
+        }
+      ],
+      "empresa_id": "40"
+    },
+    "105": {
+      "id": "105",
+      "codigo": "ZZZG7E91140C1E133980987E30FCAD8893",
+      "nome": "JORGE TEXEIRA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "632",
+          "nome": "FABRICIO LOPES DE SENA"
+        },
+        {
+          "id": "1882",
+          "nome": "SAMUEL DE SOUSA BAHIA"
+        },
+        {
+          "id": "2081",
+          "nome": "ANA PAULA LIMA DE LIMA"
+        }
+      ],
+      "empresa_id": "45"
+    },
+    "122": {
+      "id": "122",
+      "codigo": "ZZZG7E91140C1F0912E09B6FA41AAD8879",
+      "nome": "PQ 10",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "657",
+          "nome": "YAGO PABLO GONCALVES MACIEL"
+        },
+        {
+          "id": "658",
+          "nome": "BRUNO FRANCA GUERRA"
+        },
+        {
+          "id": "660",
+          "nome": "VANESSA OLIVEIRA CASTRO"
+        }
+      ],
+      "empresa_id": "46"
+    },
+    "53": {
+      "id": "53",
+      "codigo": "ZZZG7E91140C1B0239108CC00CF8AD8897",
+      "nome": "FILIAL V8",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "543",
+          "nome": "IAGO GUEDES"
+        },
+        {
+          "id": "544",
+          "nome": "MARCOS ANTONIO MENDES DA CRUZ"
+        },
+        {
+          "id": "545",
+          "nome": "LUIS GUILHERME DE MELO MARQUES"
+        }
+      ],
+      "empresa_id": "41"
+    },
+    "71": {
+      "id": "71",
+      "codigo": "ZZZG7E91140C1C2A2DA092B300D4AD88F1",
+      "nome": "ADRIANOPOLIS",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "569",
+          "nome": "IVAN FIRMINO DA COSTA NETO"
+        },
+        {
+          "id": "570",
+          "nome": "ELZILENE SAMPAIO DE CONCEICAO"
+        },
+        {
+          "id": "572",
+          "nome": "MARIANA DE CASTRO RABELO DA COSTA"
+        }
+      ],
+      "empresa_id": "43"
+    },
+    "88": {
+      "id": "88",
+      "codigo": "ZZZG7E91140C1D241EA095E74DFAAD8875",
+      "nome": "ALPHAVILLE",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "603",
+          "nome": "ESTHER SILVIA ABENSUR SANTOS"
+        },
+        {
+          "id": "604",
+          "nome": "GUSTAVO HENRIQUE CORREA DA SILVA"
+        },
+        {
+          "id": "606",
+          "nome": "MARCAL FREITAS DA COSTA FILHO"
+        }
+      ],
+      "empresa_id": "44"
+    },
+    "139": {
+      "id": "139",
+      "codigo": "ZZZG7E91140C1F3711A09E2D4BAAAD88CA",
+      "nome": "COROADO",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "677",
+          "nome": "TAYLON DA SILVA ALVES"
+        },
+        {
+          "id": "679",
+          "nome": "NATHANAEL DA COSTA VIEIRA"
+        },
+        {
+          "id": "680",
+          "nome": "THALIS ANDRADE PINHEIRO"
+        }
+      ],
+      "empresa_id": "47"
+    },
+    "156": {
+      "id": "156",
+      "codigo": "ZZZG7E91140C203230C0A17C0F8FAD88D6",
+      "nome": "PONTA NEGRA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "706",
+          "nome": "KAUA GUERREIRO DE OLIVEIRA"
+        },
+        {
+          "id": "708",
+          "nome": "RAYSAN AMORIM DA ROCHA"
+        },
+        {
+          "id": "711",
+          "nome": "ESTEVAO ARAUJO DOS SANTOS"
+        }
+      ],
+      "empresa_id": "48"
+    },
+    "173": {
+      "id": "173",
+      "codigo": "ZZZG7E91140C211E25F0A3DBD08BAD887A",
+      "nome": "PLANALTO",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "744",
+          "nome": "DIEGO SANTIAGO DIAS DE ARAUJO"
+        },
+        {
+          "id": "745",
+          "nome": "CLAUDIO DA CRUZ SILVA"
+        },
+        {
+          "id": "746",
+          "nome": "ROMULO DA SILVA BRITO"
+        }
+      ],
+      "empresa_id": "49"
+    },
+    "190": {
+      "id": "190",
+      "codigo": "ZZZG7E91140C22100FD0A6943D02AD88FC",
+      "nome": "PETROPOLIS",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "762",
+          "nome": "ISABEL CRISTINA DA SILVA SOUZA"
+        },
+        {
+          "id": "765",
+          "nome": "THIAGO MANCILHA REIS"
+        },
+        {
+          "id": "767",
+          "nome": "ANDRE VIEIRA MIRANDA"
+        }
+      ],
+      "empresa_id": "50"
+    },
+    "207": {
+      "id": "207",
+      "codigo": "ZZZG7E91140C223836E0A9002ED9AD8893",
+      "nome": "RODRIGUES",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "780",
+          "nome": "FLORIANO MIRANDA DE FREITAS"
+        },
+        {
+          "id": "781",
+          "nome": "ROBSON RAFAEL CASTRO SANTANA"
+        },
+        {
+          "id": "782",
+          "nome": "AURILANE FERREIRA RODRIGUES"
+        }
+      ],
+      "empresa_id": "51"
+    },
+    "224": {
+      "id": "224",
+      "codigo": "ZZZG7E91140C232D37E0ABEC133BAD888E",
+      "nome": "LARANJEIRAS 2",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "802",
+          "nome": "MAYLLA MATTOS CERDEIRA"
+        },
+        {
+          "id": "803",
+          "nome": "AZAMOR ARAUJO DE FREITAS JUNIOR"
+        },
+        {
+          "id": "808",
+          "nome": "ROBSON ALVES GARCEZ"
+        }
+      ],
+      "empresa_id": "52"
+    },
+    "227": {
+      "id": "227",
+      "codigo": "ZZZG7E911B12163121D013DF9FA52B7AC4",
+      "nome": "CAMAPUA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "822",
+          "nome": "NEULIS HIAGO VINHOTE DOS SANTOS"
+        },
+        {
+          "id": "823",
+          "nome": "VANESSA PANTOJA PESSOA"
+        },
+        {
+          "id": "825",
+          "nome": "MARTA DA SILVA XAVIER"
+        }
+      ],
+      "empresa_id": "166"
+    },
+    "228": {
+      "id": "228",
+      "codigo": "ZZZG7E911C0B272513108F4BB20C1F4B16",
+      "nome": "JACIRA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "837",
+          "nome": "WELLIGTON DE SOUZA FREIRE"
+        },
+        {
+          "id": "838",
+          "nome": "GESSICA SAMILA SANTOS DA COSTA"
+        },
+        {
+          "id": "840",
+          "nome": "MILENA SILVA DA MOTA"
+        }
+      ],
+      "empresa_id": "168"
+    },
+    "229": {
+      "id": "229",
+      "codigo": "ZZZG7E911C0C0D2B06E00948F4A01F4B5E",
+      "nome": "BELEM",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "852",
+          "nome": "CARLOS ANDRE DE OLIVEIRA FARIAS"
+        },
+        {
+          "id": "854",
+          "nome": "ADRIANO MENEZES DOS SANTOS"
+        },
+        {
+          "id": "856",
+          "nome": "RAIMUNDO REBELO DA SILVA"
+        }
+      ],
+      "empresa_id": "169"
+    },
+    "230": {
+      "id": "230",
+      "codigo": "ZZZG7E911C0D2B0C3570495EAD721F4BE3",
+      "nome": "SILVES",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "868",
+          "nome": "VANDERSON CASTRO DE SOUZA"
+        },
+        {
+          "id": "869",
+          "nome": "SHIRLEY COSTA BARBOSA"
+        },
+        {
+          "id": "870",
+          "nome": "NATERCIA DA SILVA RODRIGUES"
+        }
+      ],
+      "empresa_id": "170"
+    },
+    "241": {
+      "id": "241",
+      "codigo": "ZZZG7E91140C25071F80B0C953FFAD888F",
+      "nome": "PLANALTO",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "913",
+          "nome": "LUCIANO ALVES"
+        }
+      ],
+      "empresa_id": "171"
+    },
+    "246": {
+      "id": "246",
+      "codigo": "ZZZG7E91140C25071F80B0C955BDAD8894",
+      "nome": "VIEIRALVES",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "881",
+          "nome": "CAIO VICTOR ARANA COSTA"
+        },
+        {
+          "id": "883",
+          "nome": "RAVEL DE ALENCAR MENDES"
+        },
+        {
+          "id": "890",
+          "nome": "JEAN NASCIMENTO DE OLIVEIRA"
+        }
+      ],
+      "empresa_id": "171"
+    },
+    "248": {
+      "id": "248",
+      "codigo": "ZZZG7E91140C28262C60BD60214FAD8826",
+      "nome": "MATRIZ JAPIIM",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1010",
+          "nome": "LION ROGER BRANDAO LIMA"
+        },
+        {
+          "id": "1011",
+          "nome": "DEBORAH DAS NEVES BARROSO"
+        },
+        {
+          "id": "1012",
+          "nome": "YTALO DOS SANTOS MELO"
+        }
+      ],
+      "empresa_id": "67"
+    },
+    "261": {
+      "id": "261",
+      "codigo": "ZZZG7E91140C29041800BEE7C20CAD8880",
+      "nome": "FILIAL TORQUATO",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1173",
+          "nome": "JEOVANNE CARVALHO SANTIAGO"
+        },
+        {
+          "id": "1177",
+          "nome": "RAI MACEDO PEREIRA"
+        },
+        {
+          "id": "1180",
+          "nome": "YGOR SILVA DE LIMA"
+        }
+      ],
+      "empresa_id": "68"
+    },
+    "271": {
+      "id": "271",
+      "codigo": "ZZZG7E930B0E3A1A2F8044EE425D00C39A",
+      "nome": "MARGARITA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1217",
+          "nome": "RAQUEL BORGENS SILVEIRA FERREIRA"
+        },
+        {
+          "id": "1222",
+          "nome": "FRANCIMAR CRISTINA NUNES FIGUEIRA"
+        },
+        {
+          "id": "1223",
+          "nome": "CLAUDETE FELIX DA SILVA SANTANA"
+        }
+      ],
+      "empresa_id": "298"
+    },
+    "272": {
+      "id": "272",
+      "codigo": "ZZZG7E911C10112220007173D8DAE84E70",
+      "nome": "SUMUMA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1238",
+          "nome": "DIOGO LOUSADA DAMASCENO"
+        },
+        {
+          "id": "1240",
+          "nome": "MARLINEIA CLAUDINO SOUSA"
+        },
+        {
+          "id": "1241",
+          "nome": "VAGNO SOUZA DA SILVA"
+        }
+      ],
+      "empresa_id": "299"
+    },
+    "273": {
+      "id": "273",
+      "codigo": "ZZZG7E93070A262803D03E36EA3927A1FC",
+      "nome": "FILIAL LARANJEIRAS",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1252",
+          "nome": "DENNER BATISTA NEVES"
+        },
+        {
+          "id": "1253",
+          "nome": "EDWIN AUGUSTO RIBEIRO VIANA"
+        },
+        {
+          "id": "1256",
+          "nome": "EVELY KAMILLY CRUZ DE LIRA"
+        }
+      ],
+      "empresa_id": "300"
+    },
+    "274": {
+      "id": "274",
+      "codigo": "ZZZG7E911C1029050F20C58BD2A5E84E7B",
+      "nome": "TIRADENTES",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1268",
+          "nome": "KLEBER PEIXOTO DA SILVA"
+        },
+        {
+          "id": "1269",
+          "nome": "MARCOS LIMA DE QUEIROZ"
+        },
+        {
+          "id": "1270",
+          "nome": "ANDRE RICARDO SANTANA DA SILVA"
+        }
+      ],
+      "empresa_id": "301"
+    },
+    "275": {
+      "id": "275",
+      "codigo": "ZZZG7E911C1038362280FE225F32E84EA5",
+      "nome": "MORADA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1282",
+          "nome": "THIAGO MIRANDA NASCIMENTO"
+        },
+        {
+          "id": "1283",
+          "nome": "NICOLAS COELHO FARIAS"
+        },
+        {
+          "id": "1284",
+          "nome": "RYAN VASQUES DA SILVA"
+        }
+      ],
+      "empresa_id": "302"
+    },
+    "276": {
+      "id": "276",
+      "codigo": "ZZZG7E950F0C063805002CD925F2EE8091",
+      "nome": "DOM PEDRO PREMIUM ",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1301",
+          "nome": "STHEFANE OLIVEIRA DA SILVA"
+        },
+        {
+          "id": "1303",
+          "nome": "ANA CAROLINA GOMES PEREIRA"
+        },
+        {
+          "id": "1305",
+          "nome": "RODRIGO TIBERIUS MOURA DA SILVA"
+        }
+      ],
+      "empresa_id": "303"
+    },
+    "277": {
+      "id": "277",
+      "codigo": "ZZZG7E93120929031150E7730EB7884309",
+      "nome": "STO ANTONIO 2",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1306",
+          "nome": "JUNIO MOISES DA SILVA"
+        },
+        {
+          "id": "1308",
+          "nome": "FELIPE LEVY SOUZA DE MORAES"
+        },
+        {
+          "id": "1309",
+          "nome": "LUANN DA SILVA NOGUEIRA"
+        }
+      ],
+      "empresa_id": "64"
+    },
+    "281": {
+      "id": "281",
+      "codigo": "ZZZG7E91140C29202780C096C6D8AD8850",
+      "nome": "FILIAL COMPENSA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1373",
+          "nome": "DOMINGOS SAVIO NOGUEIRA RODRIGUES JUNIOR"
+        },
+        {
+          "id": "1375",
+          "nome": "ALEX RIBEIRO DOS SANTOS FILHO"
+        },
+        {
+          "id": "1377",
+          "nome": "ALEXANDRE PEREIRA DA SILVA"
+        }
+      ],
+      "empresa_id": "69"
+    },
+    "307": {
+      "id": "307",
+      "codigo": "ZZZG7E91140C2A1906F0C3B7A682AD883E",
+      "nome": "FILIAL DOM PEDRO",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1400",
+          "nome": "LORENA NANNASCHARA LACERDA ARRUDA"
+        },
+        {
+          "id": "1401",
+          "nome": "LUIZ ALBERTO BARBIERI JUNIOR"
+        },
+        {
+          "id": "1402",
+          "nome": "REGINA OLIVEIRA DA SILVA"
+        }
+      ],
+      "empresa_id": "71"
+    },
+    "320": {
+      "id": "320",
+      "codigo": "ZZZG7E91140C2B000820C5CE091BAD88F5",
+      "nome": "FILIAL CIDADE NOVA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1411",
+          "nome": "JOSE DE JESUS PALHETA CASTRO"
+        },
+        {
+          "id": "1412",
+          "nome": "LIDIA BATISTA SEIXAS"
+        },
+        {
+          "id": "1413",
+          "nome": "MATHEUS DE SOUZA GOMES"
+        }
+      ],
+      "empresa_id": "72"
+    },
+    "333": {
+      "id": "333",
+      "codigo": "ZZZG7E91140C2B1300D0C6EE3216AD88A6",
+      "nome": "FILIAL CHEIK CENTRO",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1430",
+          "nome": "NAYAN HENRIQUE MAFRA TEIXEIRA"
+        },
+        {
+          "id": "1432",
+          "nome": "RANA VITORIA DOS SANTOS DE FIGUEIREDO"
+        },
+        {
+          "id": "1434",
+          "nome": "KEVIN THYRSO FURTADO DE PAIVA"
+        }
+      ],
+      "empresa_id": "73"
+    },
+    "346": {
+      "id": "346",
+      "codigo": "ZZZG7E91140C2B252A90C80AD4EBAD8865",
+      "nome": "FILIAL TERRA NOVA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1450",
+          "nome": "VITOR SOUSA LIMA"
+        },
+        {
+          "id": "1451",
+          "nome": "DIEGO SERRA COELHO"
+        },
+        {
+          "id": "1452",
+          "nome": "WLADEMIR JOBERTH MARINHO NUNES COSTA"
+        }
+      ],
+      "empresa_id": "172"
+    },
+    "359": {
+      "id": "359",
+      "codigo": "ZZZG7E91140C2C083DE0C9E8A14BAD88E2",
+      "nome": "FILIAL FRANCESES",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1509",
+          "nome": "EDU FERREIRA NUNES"
+        },
+        {
+          "id": "1511",
+          "nome": "JAMES DOS SANTOS SILVA JUNIOR"
+        },
+        {
+          "id": "1513",
+          "nome": "ANDRESSA DE SOUZA SILVA"
+        }
+      ],
+      "empresa_id": "1"
+    },
+    "372": {
+      "id": "372",
+      "codigo": "ZZZG7E91140C2C1E3AE0CB378B00AD88B7",
+      "nome": "FILIAL ALLEGRO",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1529",
+          "nome": "ADONAY DE OLIVEIRA BRAGANCA"
+        },
+        {
+          "id": "1531",
+          "nome": "WILLY LUCAS FERREIRA"
+        },
+        {
+          "id": "1532",
+          "nome": "CRISTIANE SOUZA SANTANA"
+        }
+      ],
+      "empresa_id": "74"
+    },
+    "385": {
+      "id": "385",
+      "codigo": "ZZZG7E91140C2C321390CC5F2EBAAD8864",
+      "nome": "FILIAL CACHOEIRINHA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1543",
+          "nome": "THAIS CRISTINA ALBUQUERQUE"
+        },
+        {
+          "id": "1550",
+          "nome": "MARCOS VINICIUS DE ALMEIDA MESQUITA"
+        },
+        {
+          "id": "1554",
+          "nome": "SANDRO MARCOS VIEIRA DA SILVA"
+        }
+      ],
+      "empresa_id": "173"
+    },
+    "100": {
+      "id": "100",
+      "codigo": "ZZZG7E91140C1E133980987E2F77AD888E",
+      "nome": "MATRIZ AV DAS TORRES",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1816",
+          "nome": "ANTONIO FELIPE SOUSA NASCIMENTO"
+        },
+        {
+          "id": "1820",
+          "nome": "CRISLEM KELLY DAS NEVES DE SOUZA"
+        }
+      ],
+      "empresa_id": "45"
+    },
+    "104": {
+      "id": "104",
+      "codigo": "ZZZG7E91140C1E133980987E30AAAD8892",
+      "nome": "ALPHAVILLE",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1818",
+          "nome": "ITHALO MATHEUS NOGUEIRA SANTOS"
+        }
+      ],
+      "empresa_id": "45"
+    },
+    "148": {
+      "id": "148",
+      "codigo": "ZZZG7E91140C203230C0A17C0D3EAD88CE",
+      "nome": "MATRIZ AV DAS TORRES",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1823",
+          "nome": "ABELARDO MARIANO DA SILVA NETO"
+        }
+      ],
+      "empresa_id": "48"
+    },
+    "267": {
+      "id": "267",
+      "codigo": "ZZZG7E91140C29041800BEE7C3B4AD8886",
+      "nome": "FILIAL TERRA NOVA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1828",
+          "nome": "MATEUS DA SILVA HENRIQUES"
+        },
+        {
+          "id": "1829",
+          "nome": "GESENILDA BARBOSA MIGUEL"
+        },
+        {
+          "id": "1830",
+          "nome": "GERLANE CRISTINA VEIGA DA SILVA"
+        }
+      ],
+      "empresa_id": "68"
+    },
+    "270": {
+      "id": "270",
+      "codigo": "ZZZG7E91140C29041800BEE7C485AD8889",
+      "nome": "FILIAL CACHOEIRINHA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1832",
+          "nome": "MESSIAS FELIPE ALMEIDA DOS SANTOS"
+        }
+      ],
+      "empresa_id": "68"
+    },
+    "316": {
+      "id": "316",
+      "codigo": "ZZZG7E91140C2B000820C5CE07D0AD88F1",
+      "nome": "FILIAL TORQUATO",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1831",
+          "nome": "PATRICIA DE OLIVEIRA SANTOS"
+        }
+      ],
+      "empresa_id": "72"
+    },
+    "322": {
+      "id": "322",
+      "codigo": "ZZZG7E91140C2B000820C5CE09BEAD88F7",
+      "nome": "FILIAL TERRA NOVA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1833",
+          "nome": "SERGIO AUGUSTO DA SILVA CARVALHO"
+        }
+      ],
+      "empresa_id": "72"
+    },
+    "358": {
+      "id": "358",
+      "codigo": "ZZZG7E91140C2C083DE0C9E8A120AD88E1",
+      "nome": "FILIAL TERRA NOVA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1834",
+          "nome": "EDVAN MARICAUA CARVALHO"
+        }
+      ],
+      "empresa_id": "1"
+    },
+    "89": {
+      "id": "89",
+      "codigo": "ZZZG7E91140C1D241EA095E74E4EAD8876",
+      "nome": "JORGE TEXEIRA",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1817",
+          "nome": "TAINARA DE SOUZA MENDES"
+        }
+      ],
+      "empresa_id": "44"
+    },
+    "39": {
+      "id": "39",
+      "codigo": "ZZZG7E91140C1A0812C0897EB876AD888B",
+      "nome": "ADRIANOPOLIS",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "1907",
+          "nome": "EDUARDO JORGE VIEIRA DOS SANTOS"
+        }
+      ],
+      "empresa_id": "40"
+    },
+    "174": {
+      "id": "174",
+      "codigo": "ZZZG7E91140C211E25F0A3DBD0E2AD887B",
+      "nome": "PETROPOLIS",
+      "cei": "0",
+      "funcionarios_exemplo": [
+        {
+          "id": "2450",
+          "nome": "YARA DOS SANTOS MENEZES"
+        }
+      ],
+      "empresa_id": "49"
+    }
+  },
+  "total_departamentos": 49,
+  "departamentos_com_empresa": 49,
+  "timestamp": "2025-11-21T16:19:19.483677"
+}

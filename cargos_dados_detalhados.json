@@ -1,0 +1,725 @@
+{
+  "funcoes_extraidas": {
+    "002818": {
+      "codigo": "002818",
+      "nome": "SUPERVISOR DE HORARIOS",
+      "nome_completo": "002818 - SUPERVISOR DE HORARIOS",
+      "funcionarios_exemplo": [
+        {
+          "id": "1303",
+          "nome": "ANA CAROLINA GOMES PEREIRA"
+        },
+        {
+          "id": "854",
+          "nome": "ADRIANO MENEZES DOS SANTOS"
+        },
+        {
+          "id": "1306",
+          "nome": "JUNIO MOISES DA SILVA"
+        }
+      ]
+    },
+    "002531": {
+      "codigo": "002531",
+      "nome": "AUXILIAR ADMINISTRATIVO",
+      "nome_completo": "002531 - AUXILIAR ADMINISTRATIVO",
+      "funcionarios_exemplo": [
+        {
+          "id": "37",
+          "nome": "ODEMIRA BRITO CORREA"
+        },
+        {
+          "id": "336",
+          "nome": "MARISA MENEZES DE SOUZA"
+        },
+        {
+          "id": "1209",
+          "nome": "ELIZANGELA DA SILVA CARDOSO"
+        }
+      ]
+    },
+    "002581": {
+      "codigo": "002581",
+      "nome": "AUXILIAR DE SERVICOS GERAIS",
+      "nome_completo": "002581 - AUXILIAR DE SERVICOS GERAIS",
+      "funcionarios_exemplo": [
+        {
+          "id": "1270",
+          "nome": "ANDRE RICARDO SANTANA DA SILVA"
+        }
+      ]
+    },
+    "002527": {
+      "codigo": "002527",
+      "nome": "AUX. SERVICOS GERAIS",
+      "nome_completo": "002527 - AUX. SERVICOS GERAIS",
+      "funcionarios_exemplo": [
+        {
+          "id": "73",
+          "nome": "ALCILEIA UANDRE DA GAMA"
+        },
+        {
+          "id": "838",
+          "nome": "GESSICA SAMILA SANTOS DA COSTA"
+        },
+        {
+          "id": "825",
+          "nome": "MARTA DA SILVA XAVIER"
+        }
+      ]
+    },
+    "002677": {
+      "codigo": "002677",
+      "nome": "ESTAGIARIO ED FISICA",
+      "nome_completo": "002677 - ESTAGIARIO ED FISICA",
+      "funcionarios_exemplo": [
+        {
+          "id": "1301",
+          "nome": "STHEFANE OLIVEIRA DA SILVA"
+        },
+        {
+          "id": "1305",
+          "nome": "RODRIGO TIBERIUS MOURA DA SILVA"
+        },
+        {
+          "id": "1282",
+          "nome": "THIAGO MIRANDA NASCIMENTO"
+        }
+      ]
+    },
+    "002618": {
+      "codigo": "002618",
+      "nome": "CONSULTOR DE VENDAS",
+      "nome_completo": "002618 - CONSULTOR DE VENDAS",
+      "funcionarios_exemplo": [
+        {
+          "id": "1274",
+          "nome": "GUSTAVO QUEIROZ MUNIZ"
+        },
+        {
+          "id": "1288",
+          "nome": "JACKSON DOUGLAS COUTINHO BARRETO"
+        },
+        {
+          "id": "69",
+          "nome": "RANDRESON FERNANDES DA SILVA"
+        }
+      ]
+    },
+    "001236": {
+      "codigo": "001236",
+      "nome": "GERENTE FINANCEIRO",
+      "nome_completo": "001236 - GERENTE FINANCEIRO",
+      "funcionarios_exemplo": [
+        {
+          "id": "35",
+          "nome": "MARIA DO PERPETUO SOCORRO DE LIMA GOMES"
+        }
+      ]
+    },
+    "002819": {
+      "codigo": "002819",
+      "nome": "SUPERVISOR DE HORARIOS",
+      "nome_completo": "002819 - SUPERVISOR DE HORARIOS",
+      "funcionarios_exemplo": [
+        {
+          "id": "1238",
+          "nome": "DIOGO LOUSADA DAMASCENO"
+        },
+        {
+          "id": "822",
+          "nome": "NEULIS HIAGO VINHOTE DOS SANTOS"
+        },
+        {
+          "id": "372",
+          "nome": "ADRIANO TAVARES DOS SANTOS"
+        }
+      ]
+    },
+    "020456": {
+      "codigo": "020456",
+      "nome": "AUX. SERVIÇOS GERAIS",
+      "nome_completo": "020456 - AUX. SERVIÇOS GERAIS",
+      "funcionarios_exemplo": [
+        {
+          "id": "36",
+          "nome": "MICHAEL OLIVEIRA DOS SANTOS"
+        },
+        {
+          "id": "1287",
+          "nome": "LIDIANE SANTOS DE MELO"
+        }
+      ]
+    },
+    "002520": {
+      "codigo": "002520",
+      "nome": "AUX SERVICOS GERAIS",
+      "nome_completo": "002520 - AUX SERVICOS GERAIS",
+      "funcionarios_exemplo": [
+        {
+          "id": "1240",
+          "nome": "MARLINEIA CLAUDINO SOUSA"
+        },
+        {
+          "id": "1240",
+          "nome": "MARLINEIA CLAUDINO SOUSA"
+        }
+      ]
+    },
+    "002084": {
+      "codigo": "002084",
+      "nome": "TRABALHADOR DA MANUTENCAO DE EDIFICACOES",
+      "nome_completo": "002084 - TRABALHADOR DA MANUTENCAO DE EDIFICACOES",
+      "funcionarios_exemplo": [
+        {
+          "id": "34",
+          "nome": "GENIVON DA SILVA LOPES"
+        }
+      ]
+    },
+    "002672": {
+      "codigo": "002672",
+      "nome": "ESTAGIARIO DE ADMINISTRACAO",
+      "nome_completo": "002672 - ESTAGIARIO DE ADMINISTRACAO",
+      "funcionarios_exemplo": [
+        {
+          "id": "1217",
+          "nome": "RAQUEL BORGENS SILVEIRA FERREIRA"
+        },
+        {
+          "id": "399",
+          "nome": "PEDRO LUCAS CHAGAS COELHO"
+        },
+        {
+          "id": "413",
+          "nome": "WILLIANS DOUGLAS SANTOS DE LIMA"
+        }
+      ]
+    },
+    "002486": {
+      "codigo": "002486",
+      "nome": "ASSISTENTE DE MARKETING",
+      "nome_completo": "002486 - ASSISTENTE DE MARKETING",
+      "funcionarios_exemplo": [
+        {
+          "id": "330",
+          "nome": "AYUMI DE SENNA SILVA"
+        },
+        {
+          "id": "332",
+          "nome": "JEFERSON ATAIDE DA COSTA"
+        }
+      ]
+    },
+    "000053": {
+      "codigo": "000053",
+      "nome": "BABA",
+      "nome_completo": "000053 - BABA",
+      "funcionarios_exemplo": [
+        {
+          "id": "1017",
+          "nome": "SANDRA NARA MOREIRA PAULO"
+        }
+      ]
+    },
+    "002516": {
+      "codigo": "002516",
+      "nome": "AUX DE SERVIÇOS GERAIS",
+      "nome_completo": "002516 - AUX DE SERVIÇOS GERAIS",
+      "funcionarios_exemplo": [
+        {
+          "id": "1222",
+          "nome": "FRANCIMAR CRISTINA NUNES FIGUEIRA"
+        }
+      ]
+    },
+    "002674": {
+      "codigo": "002674",
+      "nome": "ESTAGIARIO DE ED FISICA",
+      "nome_completo": "002674 - ESTAGIARIO DE ED FISICA",
+      "funcionarios_exemplo": [
+        {
+          "id": "829",
+          "nome": "ZILMARA OLIVEIRA XAVIER"
+        },
+        {
+          "id": "894",
+          "nome": "EVANDRO RIBEIRO GONCALVES"
+        },
+        {
+          "id": "1849",
+          "nome": "WILLIAN LUCAS GOMES ALVES"
+        }
+      ]
+    },
+    "002678": {
+      "codigo": "002678",
+      "nome": "ESTAGIÁRIO ED FÍSICA",
+      "nome_completo": "002678 - ESTAGIÁRIO ED FÍSICA",
+      "funcionarios_exemplo": [
+        {
+          "id": "1853",
+          "nome": "HENRIQUE JACAUNA DE SOUZA"
+        },
+        {
+          "id": "1991",
+          "nome": "JOAO PEDRO LISBOA RODRIGUES"
+        },
+        {
+          "id": "374",
+          "nome": "JOSIAN INACIO SOARES"
+        }
+      ]
+    },
+    "002671": {
+      "codigo": "002671",
+      "nome": "ESTAGIARIO ADMINISTRACAO",
+      "nome_completo": "002671 - ESTAGIARIO ADMINISTRACAO",
+      "funcionarios_exemplo": [
+        {
+          "id": "1260",
+          "nome": "JESSICA BRAGA DANTAS"
+        },
+        {
+          "id": "1768",
+          "nome": "NATHALYA SANTOS DANTAS"
+        },
+        {
+          "id": "1419",
+          "nome": "MANUELE CARDOZO DA SILVA"
+        }
+      ]
+    },
+    "000026": {
+      "codigo": "000026",
+      "nome": "AUXILIAR DE ESCRITORIO EM GERAL",
+      "nome_completo": "000026 - AUXILIAR DE ESCRITORIO EM GERAL",
+      "funcionarios_exemplo": [
+        {
+          "id": "1901",
+          "nome": "LETICIA SOUZA DE FRANCA"
+        },
+        {
+          "id": "1894",
+          "nome": "HUGO RAMOS DA COSTA"
+        },
+        {
+          "id": "1951",
+          "nome": "IVIA VIEIRA BRAGA"
+        }
+      ]
+    },
+    "002613": {
+      "codigo": "002613",
+      "nome": "CONSULTOR (A) DE VENDAS",
+      "nome_completo": "002613 - CONSULTOR (A) DE VENDAS",
+      "funcionarios_exemplo": [
+        {
+          "id": "2153",
+          "nome": "VICTOR MANOEL ANDRADE AMBROSIO"
+        },
+        {
+          "id": "1982",
+          "nome": "POLIANA KAROLINA DOS SANTOS REIS"
+        },
+        {
+          "id": "2152",
+          "nome": "QUEZIA DA SILVA GARCIA"
+        }
+      ]
+    },
+    "002526": {
+      "codigo": "002526",
+      "nome": "AUX. SERVICOS GERAIS",
+      "nome_completo": "002526 - AUX. SERVICOS GERAIS",
+      "funcionarios_exemplo": [
+        {
+          "id": "2447",
+          "nome": "LUAN ARAUJO DE LIMA"
+        },
+        {
+          "id": "2445",
+          "nome": "DEBORA DE OLIVEIRA SERRAO"
+        },
+        {
+          "id": "2450",
+          "nome": "YARA DOS SANTOS MENEZES"
+        }
+      ]
+    },
+    "002807": {
+      "codigo": "002807",
+      "nome": "SUB GERENTE",
+      "nome_completo": "002807 - SUB GERENTE",
+      "funcionarios_exemplo": [
+        {
+          "id": "1214",
+          "nome": "OSERINA MAQUINE DO NASCIMENTO"
+        }
+      ]
+    },
+    "002518": {
+      "codigo": "002518",
+      "nome": "AUX SERV GERAIS",
+      "nome_completo": "002518 - AUX SERV GERAIS",
+      "funcionarios_exemplo": [
+        {
+          "id": "351",
+          "nome": "NILSILENE CASTRO VIANA"
+        },
+        {
+          "id": "349",
+          "nome": "DIEGO DO NASCIMENTO MELO"
+        },
+        {
+          "id": "356",
+          "nome": "FREDDY ALEXANDER HERNANDEZ VERA"
+        }
+      ]
+    },
+    "002596": {
+      "codigo": "002596",
+      "nome": "AUXILIAR SERV GERAIS",
+      "nome_completo": "002596 - AUXILIAR SERV GERAIS",
+      "funcionarios_exemplo": [
+        {
+          "id": "1014",
+          "nome": "MARIVALDO ANDRADE GUALBERTO"
+        },
+        {
+          "id": "632",
+          "nome": "FABRICIO LOPES DE SENA"
+        },
+        {
+          "id": "1013",
+          "nome": "GABRIELA TAVARES DE SOUZA"
+        }
+      ]
+    },
+    "002665": {
+      "codigo": "002665",
+      "nome": "ESTAGIARIO",
+      "nome_completo": "002665 - ESTAGIARIO",
+      "funcionarios_exemplo": [
+        {
+          "id": "1180",
+          "nome": "YGOR SILVA DE LIMA"
+        },
+        {
+          "id": "1018",
+          "nome": "ERICSON BERG SILVA DE FRANCA"
+        },
+        {
+          "id": "1012",
+          "nome": "YTALO DOS SANTOS MELO"
+        }
+      ]
+    },
+    "002679": {
+      "codigo": "002679",
+      "nome": "ESTAGIÁRIO ED FÍSICA",
+      "nome_completo": "002679 - ESTAGIÁRIO ED FÍSICA",
+      "funcionarios_exemplo": [
+        {
+          "id": "1173",
+          "nome": "JEOVANNE CARVALHO SANTIAGO"
+        },
+        {
+          "id": "1181",
+          "nome": "DAVI FELIPE BATISTA SERRA"
+        }
+      ]
+    },
+    "002566": {
+      "codigo": "002566",
+      "nome": "AUXILIAR DE MARKETING",
+      "nome_completo": "002566 - AUXILIAR DE MARKETING",
+      "funcionarios_exemplo": [
+        {
+          "id": "328",
+          "nome": "LAERCIO ALVES DA SILVA JUNIOR"
+        }
+      ]
+    },
+    "002559": {
+      "codigo": "002559",
+      "nome": "AUXILIAR DE MANUTENCAO",
+      "nome_completo": "002559 - AUXILIAR DE MANUTENCAO",
+      "funcionarios_exemplo": [
+        {
+          "id": "369",
+          "nome": "DIEGO JOSE PEREZ PEREZ"
+        },
+        {
+          "id": "1765",
+          "nome": "CLEODOMAR PEREIRA DA SILVA"
+        },
+        {
+          "id": "1855",
+          "nome": "MARCIO SOUZA DA COSTA"
+        }
+      ]
+    },
+    "002830": {
+      "codigo": "002830",
+      "nome": "SUPERVISOR TECNICO",
+      "nome_completo": "002830 - SUPERVISOR TECNICO",
+      "funcionarios_exemplo": [
+        {
+          "id": "1915",
+          "nome": "EDENILDA ALVES DE SOUZA"
+        }
+      ]
+    },
+    "002485": {
+      "codigo": "002485",
+      "nome": "ASSISTENTE DE MANUTENÇÃO",
+      "nome_completo": "002485 - ASSISTENTE DE MANUTENÇÃO",
+      "funcionarios_exemplo": [
+        {
+          "id": "1920",
+          "nome": "BRUNO SOUZA DOS SANTOS"
+        }
+      ]
+    },
+    "002822": {
+      "codigo": "002822",
+      "nome": "SUPERVISOR DE MANUTENCAO",
+      "nome_completo": "002822 - SUPERVISOR DE MANUTENCAO",
+      "funcionarios_exemplo": [
+        {
+          "id": "1922",
+          "nome": "MARCOS ANTONIO DAS CHAGAS BRUCE"
+        }
+      ]
+    },
+    "002572": {
+      "codigo": "002572",
+      "nome": "AUXILIAR DE PINTURA",
+      "nome_completo": "002572 - AUXILIAR DE PINTURA",
+      "funcionarios_exemplo": [
+        {
+          "id": "1925",
+          "nome": "ELIZEU SOUZA COSTA"
+        }
+      ]
+    },
+    "002592": {
+      "codigo": "002592",
+      "nome": "AUXILIAR JURIDICO",
+      "nome_completo": "002592 - AUXILIAR JURIDICO",
+      "funcionarios_exemplo": [
+        {
+          "id": "2049",
+          "nome": "MARIA CECILIA TEXEIRA MAR"
+        }
+      ]
+    },
+    "002539": {
+      "codigo": "002539",
+      "nome": "AUXILIAR DE CFTV",
+      "nome_completo": "002539 - AUXILIAR DE CFTV",
+      "funcionarios_exemplo": [
+        {
+          "id": "2050",
+          "nome": "DEMETRIO DA SILVA PLACIDO"
+        },
+        {
+          "id": "2458",
+          "nome": "MARIA FERNANDA DE ALMEIDA GONZAGA"
+        }
+      ]
+    },
+    "002475": {
+      "codigo": "002475",
+      "nome": "ASSISTENTE DE DEPARTAMENTO PESSOAL",
+      "nome_completo": "002475 - ASSISTENTE DE DEPARTAMENTO PESSOAL",
+      "funcionarios_exemplo": [
+        {
+          "id": "2278",
+          "nome": "CAIO RICHARD SANTOS DO NASCIMENTO"
+        },
+        {
+          "id": "2344",
+          "nome": "ARYEL QUEIROZ DE LIMA"
+        }
+      ]
+    },
+    "002446": {
+      "codigo": "002446",
+      "nome": "ANALISTA DE SISTEMAS",
+      "nome_completo": "002446 - ANALISTA DE SISTEMAS",
+      "funcionarios_exemplo": [
+        {
+          "id": "334",
+          "nome": "FELIPE HEINRICH ALVES DE MORAIS"
+        }
+      ]
+    },
+    "002483": {
+      "codigo": "002483",
+      "nome": "ASSISTENTE DE MANUTENCAO",
+      "nome_completo": "002483 - ASSISTENTE DE MANUTENCAO",
+      "funcionarios_exemplo": [
+        {
+          "id": "363",
+          "nome": "GALDINO CORREA DAS CHAGAS"
+        }
+      ]
+    },
+    "002668": {
+      "codigo": "002668",
+      "nome": "ESTAGIÁRIO",
+      "nome_completo": "002668 - ESTAGIÁRIO",
+      "funcionarios_exemplo": [
+        {
+          "id": "335",
+          "nome": "IGOR CASTILHO DE SOUZA"
+        },
+        {
+          "id": "681",
+          "nome": "LAURA ANNE PEREIRA PINHEIRO"
+        },
+        {
+          "id": "664",
+          "nome": "VINICIUS DE ALBUQUERQUE TRINDADE"
+        }
+      ]
+    },
+    "002517": {
+      "codigo": "002517",
+      "nome": "AUX DE SERVIÇOS GERAIS",
+      "nome_completo": "002517 - AUX DE SERVIÇOS GERAIS",
+      "funcionarios_exemplo": [
+        {
+          "id": "570",
+          "nome": "ELZILENE SAMPAIO DE CONCEICAO"
+        }
+      ]
+    },
+    "000654": {
+      "codigo": "000654",
+      "nome": "ASSISTENTE ADMINISTRATIVO",
+      "nome_completo": "000654 - ASSISTENTE ADMINISTRATIVO",
+      "funcionarios_exemplo": [
+        {
+          "id": "375",
+          "nome": "MONIQUE ELERES DO NASCIMENTO"
+        }
+      ]
+    },
+    "002827": {
+      "codigo": "002827",
+      "nome": "SUPERVISOR FINANCEIRO",
+      "nome_completo": "002827 - SUPERVISOR FINANCEIRO",
+      "funcionarios_exemplo": [
+        {
+          "id": "402",
+          "nome": "JOELMA RUIZ CASTRO"
+        }
+      ]
+    },
+    "002676": {
+      "codigo": "002676",
+      "nome": "ESTAGIARIO DE MARKETING",
+      "nome_completo": "002676 - ESTAGIARIO DE MARKETING",
+      "funcionarios_exemplo": [
+        {
+          "id": "403",
+          "nome": "NATAN MACHADO DA COSTA"
+        }
+      ]
+    },
+    "002456": {
+      "codigo": "002456",
+      "nome": "ARTIFICE",
+      "nome_completo": "002456 - ARTIFICE",
+      "funcionarios_exemplo": [
+        {
+          "id": "404",
+          "nome": "SAVIO PIMENTEL DA SILVA"
+        }
+      ]
+    },
+    "002623": {
+      "codigo": "002623",
+      "nome": "COORDENADOR DO RH",
+      "nome_completo": "002623 - COORDENADOR DO RH",
+      "funcionarios_exemplo": [
+        {
+          "id": "466",
+          "nome": "JADMA CRISTINA DE JESUS DA SILVA"
+        }
+      ]
+    },
+    "002545": {
+      "codigo": "002545",
+      "nome": "AUXILIAR DE DEPARTAMENTO PESSOAL",
+      "nome_completo": "002545 - AUXILIAR DE DEPARTAMENTO PESSOAL",
+      "funcionarios_exemplo": [
+        {
+          "id": "457",
+          "nome": "JOAO VITOR COIMBRA DE QUEIROZ"
+        }
+      ]
+    },
+    "002736": {
+      "codigo": "002736",
+      "nome": "PINTOR",
+      "nome_completo": "002736 - PINTOR",
+      "funcionarios_exemplo": [
+        {
+          "id": "1907",
+          "nome": "EDUARDO JORGE VIEIRA DOS SANTOS"
+        }
+      ]
+    },
+    "002497": {
+      "codigo": "002497",
+      "nome": "ASSISTENTE JURÍDICO",
+      "nome_completo": "002497 - ASSISTENTE JURÍDICO",
+      "funcionarios_exemplo": [
+        {
+          "id": "1909",
+          "nome": "DIEGO RAFAEL DE OLIVEIRA MORAES"
+        }
+      ]
+    },
+    "002829": {
+      "codigo": "002829",
+      "nome": "SUPERVISOR SERVICOS GERAIS",
+      "nome_completo": "002829 - SUPERVISOR SERVICOS GERAIS",
+      "funcionarios_exemplo": [
+        {
+          "id": "1911",
+          "nome": "WUILMER RAFAEL CARPIO FLORES"
+        }
+      ]
+    },
+    "002491": {
+      "codigo": "002491",
+      "nome": "Assistente Financeiro",
+      "nome_completo": "002491 - Assistente Financeiro",
+      "funcionarios_exemplo": [
+        {
+          "id": "1914",
+          "nome": "CYNTHIA SILVA DE MELO"
+        }
+      ]
+    },
+    "000588": {
+      "codigo": "000588",
+      "nome": "ALMOXARIFE",
+      "nome_completo": "000588 - ALMOXARIFE",
+      "funcionarios_exemplo": [
+        {
+          "id": "1992",
+          "nome": "LADSON DA SILVA E SILVA"
+        }
+      ]
+    }
+  },
+  "empresa_padrao_id": "1",
+  "total_cargos": 50,
+  "timestamp": "2025-11-21T16:20:59.507672"
+}

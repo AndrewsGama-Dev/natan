@@ -1,0 +1,36 @@
+# Configuração local (contém tokens e senhas)
+.config
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+
+# CSVs e relatórios gerados
+*_api.csv
+relatorio_*.json
+relatorio_*.txt
+
+# Logs de integração
+logs_demissao/
+*.log
+
+# Build / distribuição
+build/
+dist/
+*.spec
+*.exe
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
