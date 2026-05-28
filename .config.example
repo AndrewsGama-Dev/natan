@@ -6,14 +6,23 @@
 token = "SEU_TOKEN_ALTERDATA"
 
 [APITARGET]
-# API de destino (IFPonto/Hevi) - cadastro em massa via CSV
+# ---------------------------------------------------------------------------
+# REST IFPonto/Hevi — UMA única base para integração REST:
+# funcionarios.py, afastamentos.py e demissoes.py usam obrigatoriamente esta seção:
+# mesma URL, mesmo usuario (integracao) e mesmo token_base (SHA256 + data).
+# O que muda entre modulos é só o parametro "pag" enviado no POST (fixo no codigo ou opcional).
+# ---------------------------------------------------------------------------
 url = https://sua-api-ifponto.com/endpoint
 integracao = usuario_integracao
-# Token é gerado como SHA256(token_base + DD/MM/AAAA)
+# Token gerado pelo sistema: SHA256(token_base + data DD/MM/AAAA em America/Sao_Paulo)
 token_base = sua_chave_secreta
 
+# Opcional — demissoes.py: sobrescreve apenas o "pag" da importação de CSV de demissão.
+# Se omitido, usa o padrao funcionario_demissao.
+# pag_demissao = funcionario_demissao
+
 [SOAP]
-# Web service SOAP do IFPonto (demissões)
+# Opcional — legado SOAP; demissoes.py usa REST pela [APITARGET]. Mantenha se outro fluxo usar.
 url = https://seu-servidor-ifponto.com/soap
 client_id = SEU_CLIENT_ID
 usuario = usuario_soap

@@ -18,6 +18,14 @@ Data: 2025
 
 import sys
 import os
+
+# Configurar encoding UTF-8 no Windows para evitar UnicodeEncodeError
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 import time
 from datetime import datetime
 import json
@@ -80,7 +88,7 @@ def verificar_prerequisitos():
             erros.append("❌ Erro ao ler arquivo .config")
         else:
             # Verificar seções necessárias
-            secoes_necessarias = ['APISOURCE', 'APITARGET', 'SOAP']
+            secoes_necessarias = ['APISOURCE', 'APITARGET']
             for secao in secoes_necessarias:
                 if secao not in config:
                     erros.append(f"❌ Seção [{secao}] não encontrada no .config")

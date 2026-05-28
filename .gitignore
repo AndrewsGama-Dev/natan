@@ -13,6 +13,9 @@ venv/
 .venv/
 env/
 
+# Histórico de CPF já exportados em demissões (dados sensíveis; não commitar em repositório público)
+demissoes_cpf_processados.txt
+
 # CSVs e relatórios gerados
 *_api.csv
 relatorio_*.json

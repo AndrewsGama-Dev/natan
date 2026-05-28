@@ -7,7 +7,115 @@ import hashlib
 import pytz
 import configparser
 import sys
+from urllib.parse import urljoin
 from config_reader import obter_headers_api, ler_token_config
+
+def _resolver_link_paginacao(url_requisicao, next_link):
+    """JSON:API: links.next pode ser URL absoluta ou relativa à requisição atual."""
+    if not next_link:
+        return None
+    n = str(next_link).strip()
+    if n.startswith('http://') or n.startswith('https://'):
+        return n
+    base = (url_requisicao or '').split('#')[0]
+    if not base:
+        return n
+    return urljoin(base, n)
+
+# Na Alterdata, férias costuma vir como status Afastado (afastamentodescricao=Férias), não como status "ferias".
+STATUS_FUNCIONARIOS_CSV = ("ativo", "afastado")
+
+def _coletar_funcionarios_paginado(headers, params, rotulo_coleta):
+    """Pagina funcionarios da API com params JSON:API (filter, sort, page[limit])."""
+    base_url = "https://dp.pack.alterdata.com.br/api/v1/funcionarios"
+    coletados = []
+    url_atual = base_url
+    pagina = 1
+    urls_ja_visitadas = set()
+    paginas_vazias_com_next = 0
+    max_paginas_vazias_com_next = 15
+    max_paginas_seguranca = 10000
+    timeout_s = 60
+    max_tentativas_por_pagina = 8
+    status_retry = {502, 503, 504}
+
+    while url_atual:
+        url_canonica = url_atual.split("#")[0]
+        if url_canonica in urls_ja_visitadas:
+            print(f"  [{rotulo_coleta}] links.next repetiu URL — evitando loop.")
+            break
+        urls_ja_visitadas.add(url_canonica)
+
+        if pagina > max_paginas_seguranca:
+            print(f"  [{rotulo_coleta}] Limite de seguranca de paginas atingido.")
+            break
+
+        response = None
+        for tentativa in range(1, max_tentativas_por_pagina + 1):
+            try:
+                print(f"  [{rotulo_coleta}] pagina {pagina} (tentativa {tentativa})... ", end="")
+                if pagina == 1:
+                    response = requests.get(
+                        url_atual, headers=headers, params=params, timeout=timeout_s
+                    )
+                else:
+                    response = requests.get(url_atual, headers=headers, timeout=timeout_s)
+                print(f"Status: {response.status_code}")
+
+                if response.status_code == 200:
+                    break
+                if response.status_code == 429:
+                    espera = min(120, 10 + tentativa * 10)
+                    print(f"    Rate limit — aguardando {espera}s...")
+                    time.sleep(espera)
+                    continue
+                if response.status_code in status_retry:
+                    espera = min(60, 2 ** tentativa)
+                    print(f"    Servidor ocupado ({response.status_code}) — aguardando {espera}s...")
+                    time.sleep(espera)
+                    continue
+                print(f"    Erro {response.status_code}: {response.text[:200]}")
+                response = None
+                break
+            except requests.exceptions.RequestException as e:
+                print(f"    Erro na conexao: {e}")
+                time.sleep(min(30, 2 * tentativa))
+                response = None
+
+        if response is None or response.status_code != 200:
+            print(f"  [{rotulo_coleta}] Coleta interrompida apos falhas na pagina {pagina}.")
+            break
+
+        try:
+            data = response.json()
+        except ValueError as e:
+            print(f"  [{rotulo_coleta}] Resposta nao e JSON valido: {e}")
+            break
+
+        funcionarios_pagina = data.get('data') or []
+        proximo = _resolver_link_paginacao(response.url, (data.get('links') or {}).get('next'))
+
+        if funcionarios_pagina:
+            coletados.extend(funcionarios_pagina)
+            paginas_vazias_com_next = 0
+            print(f"    {len(funcionarios_pagina)} registros (total {rotulo_coleta}: {len(coletados)})")
+        else:
+            if proximo:
+                paginas_vazias_com_next += 1
+                if paginas_vazias_com_next > max_paginas_vazias_com_next:
+                    print(f"  [{rotulo_coleta}] Muitas paginas vazias seguidas — parando.")
+                    break
+            else:
+                break
+
+        if not proximo:
+            break
+
+        url_atual = proximo
+        pagina += 1
+        time.sleep(0.25)
+
+    return coletados
 
 def ler_campo_chave_config():
     """
@@ -93,6 +201,21 @@ def formatar_cpf_11_digitos(cpf):
         return cpf_formatado
     
     return ""
+
+def normalizar_email(email, cpf_fallback=''):
+    """
+    API Alterdata pode retornar a string 'null' no email.
+    O destino rejeita NULL na coluna email — usa fallback a partir do CPF quando invalido.
+    """
+    if email is None:
+        email = ''
+    email = str(email).strip()
+    if email.lower() in ('', 'null', 'none', 'undefined', 'nil'):
+        cpf = formatar_cpf_11_digitos(cpf_fallback)
+        if cpf:
+            return f"{cpf}@sememail.local"
+        return ''
+    return email
 
 def formatar_matricula_simples(matricula_original):
     """
@@ -273,7 +396,7 @@ def extrair_nome_limpo_cargo(nome_funcao):
             return partes[1].strip()
     
     return nome_funcao.strip()
-
+    
 def buscar_dados_departamento(funcionario_id, headers):
     """
     Busca informacoes do departamento do funcionario
@@ -370,82 +493,45 @@ def buscar_dados_departamento(funcionario_id, headers):
 
 def consultar_todos_funcionarios_para_csv():
     """
-    Coleta APENAS funcionarios ATIVOS da API
+    Coleta funcionarios elegiveis para o CSV: status Ativo e Afastado (férias/afastamentos).
+    Demitidos ficam fora (modulo demissoes.py). Deduplica por id da API.
     """
-    print("INICIANDO COLETA DE FUNCIONARIOS ATIVOS PARA CSV...")
+    print("INICIANDO COLETA DE FUNCIONARIOS (Ativo + Afastado) PARA CSV...")
     
     headers = obter_headers_api()
     if not headers:
         print("Nao foi possivel obter o token do arquivo .config")
         return [], None
     
-    base_url = "https://dp.pack.alterdata.com.br/api/v1/funcionarios"
-    
-    params = {
-        "filter[status]": "ativo",
+    params_base = {
         "sort": "codigo",
-        "page[limit]": "100"
+        "page[limit]": "100",
     }
     
-    todos_funcionarios = []
-    url_atual = base_url
-    pagina = 1
-    tentativas_sem_dados = 0
-    max_tentativas_sem_dados = 3
+    por_id = {}
+    totais_por_status = {}
     
-    while url_atual and tentativas_sem_dados < max_tentativas_sem_dados:
-        try:
-            print(f"  Coletando pagina {pagina}... ", end="")
-            
-            if pagina == 1:
-                response = requests.get(url_atual, headers=headers, params=params, timeout=30)
-            else:
-                response = requests.get(url_atual, headers=headers, timeout=30)
-            
-            print(f"Status: {response.status_code}")
-            
-            if response.status_code == 200:
-                data = response.json()
-                funcionarios_pagina = data.get('data', [])
-                
-                if funcionarios_pagina:
-                    todos_funcionarios.extend(funcionarios_pagina)
-                    print(f"    {len(funcionarios_pagina)} funcionarios ATIVOS coletados (Total: {len(todos_funcionarios)})")
-                    tentativas_sem_dados = 0
-                    
-                    links = data.get('links', {})
-                    url_atual = links.get('next')
-                    
-                    if url_atual:
-                        print(f"    Proxima pagina: {url_atual[:80]}...")
-                    else:
-                        print(f"    Ultima pagina alcancada")
-                        break
-                        
-                    pagina += 1
-                    time.sleep(0.2)
-                else:
-                    print(f"    Pagina sem dados")
-                    tentativas_sem_dados += 1
-                    break
-                    
-            elif response.status_code == 429:
-                print(f"    Rate limit - aguardando 10 segundos...")
-                time.sleep(10)
-                continue
-            else:
-                print(f"    Erro {response.status_code}: {response.text[:100]}")
-                tentativas_sem_dados += 1
-                break
-                
-        except requests.exceptions.RequestException as e:
-            print(f"    Erro na conexao: {e}")
-            tentativas_sem_dados += 1
-            time.sleep(2)
+    for status_filtro in STATUS_FUNCIONARIOS_CSV:
+        params = {**params_base, "filter[status]": status_filtro}
+        rotulo = status_filtro.upper()
+        print(f"\n--- Coleta status={status_filtro} ---")
+        lote = _coletar_funcionarios_paginado(headers, params, rotulo)
+        totais_por_status[status_filtro] = len(lote)
+        for funcionario in lote:
+            fid = funcionario.get('id')
+            if fid is not None:
+                por_id[fid] = funcionario
+    
+    todos_funcionarios = list(por_id.values())
     
     print(f"\nCOLETA FINALIZADA:")
-    print(f"  Total de funcionarios ATIVOS coletados: {len(todos_funcionarios)}")
-    print(f"  Paginas processadas: {pagina - 1}")
+    for status_filtro, qtd in totais_por_status.items():
+        print(f"  Registros coletados (status={status_filtro}): {qtd}")
+    if len(STATUS_FUNCIONARIOS_CSV) > 1:
+        soma_bruta = sum(totais_por_status.values())
+        if soma_bruta != len(todos_funcionarios):
+            print(f"  Duplicatas entre status removidas: {soma_bruta - len(todos_funcionarios)}")
+    print(f"  Total unico para CSV: {len(todos_funcionarios)}")
     
     return todos_funcionarios, headers
 
@@ -494,9 +580,14 @@ def mapear_funcionario_para_csv(funcionario_api, headers=None):
     matricula_simples = formatar_matricula_simples(codigo_funcionario)
     
     # QUINTO: Por enquanto sempre usar senha padrao
-    senha_padrao = 'Ponto123'
+    senha_padrao = 'Natan123'
     
     # SEXTO: Mapeamento dos campos do CSV
+    email_api = attributes.get('email')
+    email_normalizado = normalizar_email(email_api, cpf_formatado)
+    if str(email_api or '').strip().lower() == 'null':
+        print(f"    AVISO: email 'null' na API — usando: {email_normalizado}")
+
     funcionario_csv = {
         'campo_chave': campo_chave,  # Valor lido do .config
         'nome': attributes.get('nome', ''),
@@ -505,8 +596,7 @@ def mapear_funcionario_para_csv(funcionario_api, headers=None):
         'rg': attributes.get('identidade', ''),
         'pis': attributes.get('pis', '') or cpf_formatado,  # CPF como fallback
         'dtadmissao': formatar_data_brasileira(attributes.get('admissao')),
-        'cnh': '',
-        'email': attributes.get('email', ''),
+        'email': email_normalizado,
         'nome_tipo_pessoa': '',
         'telefone': '',
         'ramal': '',
@@ -521,7 +611,7 @@ def mapear_funcionario_para_csv(funcionario_api, headers=None):
         'tipo_salario': '',
         'salario': str(attributes.get('salarioBase', '')),
         'dtnascimento': formatar_data_brasileira(attributes.get('nascimento')),
-        'nome_mae': '',
+        'nome_mae': attributes.get('nomedamae', ''),
         'nome_pai': '',
         'escolaridade': '',
         'estado_civil': '',
@@ -568,10 +658,10 @@ def mapear_funcionario_para_csv(funcionario_api, headers=None):
 
 def gerar_csv_funcionarios():
     """
-    Funcao principal para gerar o CSV dos funcionarios ATIVOS com matricula simples (6 digitos)
+    Funcao principal para gerar o CSV dos funcionarios (Ativo + Afastado) com matricula simples (6 digitos)
     """
     print("=" * 80)
-    print("         GERACAO DE CSV DE FUNCIONARIOS ATIVOS - API eContador")
+    print("         GERACAO DE CSV DE FUNCIONARIOS - API eContador (Ativo + Afastado)")
     print("=" * 80)
     
     token = ler_token_config()
@@ -582,10 +672,10 @@ def gerar_csv_funcionarios():
     funcionarios_api, headers = consultar_todos_funcionarios_para_csv()
     
     if not funcionarios_api:
-        print("Nenhum funcionario ATIVO foi coletado da API")
+        print("Nenhum funcionario foi coletado da API")
         return
     
-    print(f"\nConvertendo {len(funcionarios_api)} funcionarios ATIVOS para formato CSV...")
+    print(f"\nConvertendo {len(funcionarios_api)} funcionarios para formato CSV...")
     
     funcionarios_csv = []
     erros = []
@@ -673,10 +763,10 @@ def processar_integracao_completa():
     Funcao principal que executa todo o processo
     """
     print("=" * 80)
-    print("    INTEGRACAO COMPLETA DE FUNCIONARIOS ATIVOS - eContador -> Hevi")
+    print("    INTEGRACAO COMPLETA DE FUNCIONARIOS - eContador -> Hevi")
     print("=" * 80)
     
-    print("\nETAPA 1: Coletando funcionarios ATIVOS da API eContador...")
+    print("\nETAPA 1: Coletando funcionarios da API eContador (Ativo + Afastado)...")
     arquivo_csv = gerar_csv_funcionarios()
     
     if not arquivo_csv:
@@ -691,7 +781,7 @@ def processar_integracao_completa():
     
     if sucesso_envio:
         print("\nINTEGRACAO COMPLETA FINALIZADA COM SUCESSO!")
-        print(f"Funcionarios ATIVOS coletados da API eContador")
+        print(f"Funcionarios coletados da API eContador")
         print(f"CSV gerado: {arquivo_csv}")
         print(f"Dados enviados para sistema Hevi")
         print(f"IMPORTANTE: Matricula usa formato simples de 6 digitos")

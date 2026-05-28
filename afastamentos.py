@@ -12,6 +12,17 @@ import csv
 import io
 import sys
 from config_reader import obter_headers_api, ler_token_config
+from funcionarios import (
+    formatar_cpf_11_digitos,
+    ler_campo_chave_config,
+)
+
+def _rotulo_registro_afastamento(row):
+    """Identificador exibido no resumo final (CSV sem coluna matricula)."""
+    cpf = row.get('cpf', '')
+    if cpf is not None and str(cpf).strip() and str(cpf).lower() != 'nan':
+        return str(cpf).strip()
+    return str(row.get('id-afastamento', '?'))
 
 def carregar_configuracoes():
     """Funcao para carregar configuracoes do arquivo .config"""
@@ -48,48 +59,6 @@ def gerar_token_target():
     token_final = hashlib.sha256(token_concatenado.encode('utf-8')).hexdigest()
     
     return url, integracao, token_final
-
-def buscar_dados_empresa(funcionario_id, headers):
-    """
-    Busca informaçoes da empresa do funcionario na API
-    """
-    try:
-        url_empresa = f"https://dp.pack.alterdata.com.br/api/v1/funcionarios/{funcionario_id}/empresa"
-        response = requests.get(url_empresa, headers=headers)
-        
-        if response.status_code == 200:
-            empresa_data = response.json()
-            empresa_info = empresa_data.get('data', {})
-            if empresa_info:
-                return empresa_info.get('id', '')
-        else:
-            print(f"    Erro {response.status_code} ao buscar empresa do funcionario {funcionario_id}")
-    except Exception as e:
-        print(f"    Erro ao buscar empresa do funcionario {funcionario_id}: {e}")
-    
-    return ''
-
-def formatar_matricula_composta(cod_empresa, matricula_original):
-    """
-    Formata a matricula no padrao: cod_empresabmatricula_6_digitos
-    Exemplo: cod_empresa=168, matricula=2 -> 168b000002
-    """
-    try:
-        # Garantir que a matricula tenha 6 digitos com zeros a esquerda
-        matricula_6_digitos = str(matricula_original).zfill(6)
-        
-        # Compor a matricula final
-        matricula_composta = f"{cod_empresa}b{matricula_6_digitos}"
-        
-        print(f"    Matricula original: {matricula_original}")
-        print(f"    Matricula 6 digitos: {matricula_6_digitos}")
-        print(f"    Matricula FINAL: {matricula_composta}")
-        
-        return matricula_composta
-        
-    except Exception as e:
-        print(f"    Erro ao formatar matricula: {e}")
-        return f"{cod_empresa}b{str(matricula_original).zfill(6)}"
 
 def converter_para_csv(dados, nome_arquivo="dados.csv"):
     """Funcao para converter dados em CSV com cabecalhos em lowercase"""
@@ -200,29 +169,29 @@ def processar_modulo_afastamentos(dados_afastamentos, nome_arquivo_csv, nome_mod
         print(f"\nNenhum dado de {nome_modulo} disponivel")
         return False
 
+def _parse_data_iso(valor):
+    """Converte string ISO da API Alterdata em datetime."""
+    return datetime.fromisoformat(str(valor).replace('Z', '+00:00'))
+
 def extrair_datas_dos_campos_corretos(attributes):
     """
-    FUNCAO CORRIGIDA: Extrai datas dos campos corretos identificados
-    
-    CAMPOS CORRETOS IDENTIFICADOS:
-    - attributes['afastamento'] = Data de INICIO (2025-07-16T03:00:00Z)
-    - attributes['retorno'] = Data de FIM (2025-07-18T03:00:00Z)
+    Extrai datas dos campos da API Alterdata:
+    - attributes['afastamento'] = data de inicio
+    - attributes['retorno'] = data de fim
+    Se houver apenas inicio, retorno = inicio + 20 anos.
     """
     print(f"  Extraindo datas dos CAMPOS CORRETOS...")
     
-    # BUSCAR CAMPOS CORRETOS
-    campo_inicio = attributes.get('afastamento')  # Data de INICIO
-    campo_fim = attributes.get('retorno')         # Data de FIM
+    campo_inicio = attributes.get('afastamento')
+    campo_fim = attributes.get('retorno')
     
     print(f"    Campo 'afastamento' (INICIO): {campo_inicio}")
     print(f"    Campo 'retorno' (FIM): {campo_fim}")
     
-    # Verificar se temos ambos os campos
     if campo_inicio and campo_fim:
         try:
-            # Converter datas ISO para formato DD/MM/YYYY
-            dt_inicio = datetime.fromisoformat(campo_inicio.replace('Z', '+00:00'))
-            dt_fim = datetime.fromisoformat(campo_fim.replace('Z', '+00:00'))
+            dt_inicio = _parse_data_iso(campo_inicio)
+            dt_fim = _parse_data_iso(campo_fim)
             
             data_inicio_fmt = dt_inicio.strftime('%d/%m/%Y')
             data_fim_fmt = dt_fim.strftime('%d/%m/%Y')
@@ -233,10 +202,29 @@ def extrair_datas_dos_campos_corretos(attributes):
         except Exception as e:
             print(f"    Erro ao converter datas: {e}")
     
-    # Se nao temos ambos, tentar pelo menos o retorno
+    elif campo_inicio and not campo_fim:
+        try:
+            dt_inicio = _parse_data_iso(campo_inicio)
+            try:
+                dt_fim = dt_inicio.replace(year=dt_inicio.year + 20)
+            except ValueError:
+                dt_fim = dt_inicio.replace(year=dt_inicio.year + 20, day=28)
+            
+            data_inicio_fmt = dt_inicio.strftime('%d/%m/%Y')
+            data_fim_fmt = dt_fim.strftime('%d/%m/%Y')
+            
+            print(
+                f"    Retorno ausente na API — usando inicio + 20 anos: "
+                f"{data_inicio_fmt} ate {data_fim_fmt}"
+            )
+            return data_inicio_fmt, data_fim_fmt, "INICIO_MAIS_20_ANOS"
+            
+        except Exception as e:
+            print(f"    Erro ao calcular retorno (inicio + 20 anos): {e}")
+    
     elif campo_fim:
         try:
-            dt_fim = datetime.fromisoformat(campo_fim.replace('Z', '+00:00'))
+            dt_fim = _parse_data_iso(campo_fim)
             data_fim_fmt = dt_fim.strftime('%d/%m/%Y')
             
             print(f"    Apenas data FIM: {data_fim_fmt}")
@@ -260,7 +248,7 @@ def consultar_funcionarios_com_afastamentos():
     base_url = "https://dp.pack.alterdata.com.br/api/v1/funcionarios"
     
     params = {
-        "fields": "codigo,nome,afastamento,afastamentodescricao,status,retorno",
+        "fields": "codigo,nome,cpf,afastamento,afastamentodescricao,status,retorno",
         "sort": "codigo"
     }
     
@@ -315,22 +303,31 @@ def consultar_funcionarios_com_afastamentos():
     print(f"\nTotal de funcionarios com afastamento: {len(funcionarios_com_afastamento)}")
     return funcionarios_com_afastamento, headers
 
-def mapear_afastamento_para_csv(funcionario_api, headers):
+def mapear_afastamento_para_csv(funcionario_api, campo_chave):
     """
-    FUNCAO PRINCIPAL ATUALIZADA: Usar matricula composta sem campo COD_EMPRESA separado
+    Coluna CAMPO_CHAVE no CSV: mesmo texto da secao [FUNCIONARIOS] do .config
+    que funcionarios.py usa em ler_campo_chave_config.
+    Coluna CPF: 11 digitos (sem mascara).
     """
     attributes = funcionario_api.get('attributes', {})
     funcionario_id = funcionario_api.get('id', '')
     
     afastamento_desc = attributes.get('afastamentodescricao', '')
-    codigo_funcionario = attributes.get('codigo', funcionario_id)
+    codigo_funcionario = attributes.get('codigo', '')
+    if not codigo_funcionario:
+        codigo_funcionario = str(funcionario_id)
     
-    # BUSCAR CODIGO DA EMPRESA
-    cod_empresa = buscar_dados_empresa(funcionario_id, headers)
-    print(f"\nMapeando funcionario {codigo_funcionario} - Empresa: {cod_empresa}")
+    # Valor exibido no CSV = igual funcionarios_api (preserva grafia do .config)
+    campo_chave_csv = (campo_chave or "").strip() or 'matricula'
+    campo_ck_norm = campo_chave_csv.lower()
     
-    # FORMATAR MATRICULA COMPOSTA
-    matricula_composta = formatar_matricula_composta(cod_empresa, codigo_funcionario)
+    cpf_fmt = formatar_cpf_11_digitos(attributes.get('cpf', ''))
+    print(
+        f"\nMapeando funcionario {codigo_funcionario} — cpf: {cpf_fmt or '(vazio)'} | "
+        f"campo_chave CSV ({campo_chave_csv})"
+    )
+    if campo_ck_norm == 'cpf' and not cpf_fmt:
+        print("    AVISO: CPF vazio na API — verificar cadastro no destino se a chave for cpf.")
     
     # DEFINIR ID-AFASTAMENTO BASEADO NO CONTEUDO DO OBS
     obs_normalizada = afastamento_desc.lower().strip() if afastamento_desc else ''
@@ -353,29 +350,29 @@ def mapear_afastamento_para_csv(funcionario_api, headers):
     # USAR CAMPOS CORRETOS DIRETAMENTE
     dtinicio, dtfim, origem_data = extrair_datas_dos_campos_corretos(attributes)
     
-    # Se nao conseguimos extrair
     if not dtinicio or not dtfim:
-        print(f"    ERRO: Nao foi possivel obter datas dos campos")
-        dtinicio = dtinicio or 'SEM_DATA_API'
-        dtfim = dtfim or 'SEM_DATA_API'
-        origem_data = 'ERRO_API'
+        print(
+            f"    PULANDO registro — sem datas na API "
+            f"(cpf: {cpf_fmt or 'N/A'}, obs: {afastamento_desc or 'N/A'})"
+        )
+        return None
     
-    # Mapeamento final - USANDO MATRICULA COMPOSTA (sem COD_EMPRESA separado)
     afastamento_csv = {
         'ID-AFASTAMENTO': codigo_afastamento,
         'DTINICIO': dtinicio,
         'DTFIM': dtfim,
         'OBS': afastamento_desc if afastamento_desc else 'Afastamento',
-        'CAMPO_CHAVE': 'matricula',
-        'MATRICULA': matricula_composta
+        'CAMPO_CHAVE': campo_chave_csv,
+        'CPF': cpf_fmt or '',
+        
     }
     
     return afastamento_csv
 
 def gerar_csv_afastamentos():
-    """FUNCAO PRINCIPAL: Gerar CSV usando matricula composta"""
+    """CSV de afastamentos: campo_chave + cpf (sem coluna matricula)."""
     print("=" * 80)
-    print("     GERACAO DE CSV COM MATRICULA COMPOSTA - PADRAO: cod_empresabmatricula")
+    print("     GERACAO DE CSV DE AFASTAMENTOS - chave por cpf/campo_chave do .config")
     print("=" * 80)
     
     token = ler_token_config()
@@ -383,8 +380,11 @@ def gerar_csv_afastamentos():
         print("Falha ao carregar token do arquivo .config")
         return None
     
+    campo_chave_cfg = ler_campo_chave_config()
+    print(f"\n[Afastamentos] CAMPO_CHAVE no CSV igual ao .config [FUNCIONARIOS]: {campo_chave_cfg.strip() if campo_chave_cfg else campo_chave_cfg}")
+    
     print("\n1. Consultando afastamentos na API Alterdata...")
-    funcionarios_afastamento, headers = consultar_funcionarios_com_afastamentos()
+    funcionarios_afastamento, _ = consultar_funcionarios_com_afastamentos()
     
     if not funcionarios_afastamento:
         print("Nenhum funcionario com afastamento foi encontrado")
@@ -397,32 +397,30 @@ def gerar_csv_afastamentos():
     
     for funcionario_api in funcionarios_afastamento:
         try:
-            afastamento_csv = mapear_afastamento_para_csv(funcionario_api, headers)
+            afastamento_csv = mapear_afastamento_para_csv(funcionario_api, campo_chave_cfg)
+            if not afastamento_csv:
+                funcionarios_sem_datas += 1
+                continue
             
             obs = afastamento_csv['OBS'].lower()
             if 'ferias' not in obs:
                 afastamentos_csv.append(afastamento_csv)
-                
-                # Contar sucessos
-                if afastamento_csv['DTINICIO'] != 'SEM_DATA_API' and afastamento_csv['DTFIM'] != 'SEM_DATA_API':
-                    funcionarios_com_datas_reais += 1
-                else:
-                    funcionarios_sem_datas += 1
+                funcionarios_com_datas_reais += 1
                     
         except Exception as e:
             print(f"Erro ao processar funcionario: {e}")
             funcionarios_sem_datas += 1
     
     print(f"\nRESULTADO:")
-    print(f"   Funcionarios com datas CORRETAS: {funcionarios_com_datas_reais}")
-    print(f"   Funcionarios sem datas: {funcionarios_sem_datas}")
+    print(f"   Registros exportados com datas: {funcionarios_com_datas_reais}")
+    print(f"   Registros pulados (sem datas na API): {funcionarios_sem_datas}")
     print(f"   Total de registros: {len(afastamentos_csv)}")
     
     return afastamentos_csv
 
 def processar_integracao_completa():
-    """FUNCAO PRINCIPAL ATUALIZADA"""
-    print("INICIANDO INTEGRACAO COM MATRICULA COMPOSTA")
+    """Integracao afastamentos (identificador alinhado a funcionarios.py)."""
+    print("INICIANDO INTEGRACAO DE AFASTAMENTOS")
     print("="*50)
     
     dados_afastamentos = gerar_csv_afastamentos()
@@ -446,7 +444,8 @@ def processar_integracao_completa():
             df = pd.read_csv('afastamentos_api.csv', sep=';')
             print(f"\nREGISTROS GERADOS ({len(df)} total):")
             for i, row in df.iterrows():
-                print(f"   {row['matricula']}: {row['dtinicio']} a {row['dtfim']} | {row['obs']}")
+                rotulo = _rotulo_registro_afastamento(row)
+                print(f"   {rotulo}: {row['dtinicio']} a {row['dtfim']} | {row['obs']}")
                 
         except Exception as e:
             print(f"Erro ao ler CSV: {e}")
@@ -470,7 +469,7 @@ if __name__ == "__main__":
             if dados:
                 csv_content = converter_para_csv(dados, 'afastamentos_api.csv')
                 if csv_content:
-                    print(f"\nCSV FINAL GERADO COM MATRICULA COMPOSTA!")
+                    print(f"\nCSV FINAL GERADO (cpf + campo_chave conforme .config)")
                     print(f"Arquivo: afastamentos_api.csv")
                     
                     # Mostrar todos os registros
@@ -478,7 +477,8 @@ if __name__ == "__main__":
                         df = pd.read_csv('afastamentos_api.csv', sep=';')
                         print(f"\nTODOS OS REGISTROS ({len(df)}):")
                         for i, row in df.iterrows():
-                            print(f"   {row['matricula']}: {row['dtinicio']} a {row['dtfim']} | {row['obs']}")
+                            rotulo = _rotulo_registro_afastamento(row)
+                            print(f"   {rotulo}: {row['dtinicio']} a {row['dtfim']} | {row['obs']}")
                             
                     except Exception as e:
                         print(f"Erro ao analisar CSV: {e}")
@@ -500,9 +500,9 @@ if __name__ == "__main__":
             print("  python afastamentos.py csv        # Apenas gerar CSV")
             print("  python afastamentos.py enviar [arquivo.csv]")
     else:
-        print("EXECUTANDO INTEGRACAO COM MATRICULA COMPOSTA")
+        print("EXECUTANDO INTEGRACAO DE AFASTAMENTOS")
         sucesso = processar_integracao_completa()
         if sucesso:
-            print(f"\nINTEGRACAO CONCLUIDA COM MATRICULA COMPOSTA!")
+            print(f"\nINTEGRACAO CONCLUIDA!")
         else:
             print(f"\nINTEGRACAO FALHOU")
