@@ -10,7 +10,18 @@ import pytz
 import configparser
 import csv
 import io
+import unicodedata
 from config_reader import obter_headers_api, ler_token_config
+
+def _normalizar_texto(descricao):
+    """Remove acentos e deixa minusculo (API envia 'Férias', nao 'ferias')."""
+    if not descricao:
+        return ''
+    texto = unicodedata.normalize('NFD', str(descricao))
+    return ''.join(c for c in texto if unicodedata.category(c) != 'Mn').lower()
+
+def _descricao_e_ferias(descricao):
+    return 'ferias' in _normalizar_texto(descricao)
 
 def carregar_configuracoes():
     """
@@ -349,10 +360,8 @@ def consultar_funcionarios_com_ferias():
                 for funcionario in funcionarios_pagina:
                     attributes = funcionario.get('attributes', {})
                     afastamento_desc_raw = attributes.get('afastamentodescricao', '')
-                    afastamento_desc = afastamento_desc_raw.lower() if afastamento_desc_raw else ''
                     
-                    # Verificar se e especificamente FERIAS
-                    if afastamento_desc and 'ferias' in afastamento_desc:
+                    if afastamento_desc_raw and _descricao_e_ferias(afastamento_desc_raw):
                         # Buscar detalhes completos do funcionario
                         funcionario_detalhado = buscar_detalhes_funcionario_completo(funcionario.get('id'), headers)
                         if funcionario_detalhado:
@@ -360,9 +369,10 @@ def consultar_funcionarios_com_ferias():
                         
                         funcionarios_com_ferias.append(funcionario)
                 
-                ferias_encontradas = len([f for f in funcionarios_pagina 
-                                        if f.get('attributes', {}).get('afastamentodescricao') 
-                                        and 'ferias' in (f.get('attributes', {}).get('afastamentodescricao') or '').lower()])
+                ferias_encontradas = len([
+                    f for f in funcionarios_pagina
+                    if _descricao_e_ferias((f.get('attributes', {}) or {}).get('afastamentodescricao'))
+                ])
                 print(f"{len(funcionarios_pagina)} funcionarios ({ferias_encontradas} em ferias)")
                 
                 # Verificar se ha proxima pagina
@@ -481,8 +491,8 @@ def gerar_csv_ferias():
     funcionarios_ferias, headers = consultar_funcionarios_com_ferias()
     
     if not funcionarios_ferias:
-        print("Nenhum funcionario em ferias foi encontrado na API")
-        return None
+        print("Nenhum funcionario em ferias foi encontrado na API (momento atual).")
+        return []
     
     print(f"\n{len(funcionarios_ferias)} funcionarios em ferias encontrados!")
     
@@ -497,8 +507,7 @@ def gerar_csv_ferias():
             
             # Filtrar apenas registros com descricao de ferias valida
             obs_raw = ferias_csv_item['OBS']
-            obs_lower = obs_raw.lower() if obs_raw else ''
-            if ferias_csv_item['OBS'] and 'ferias' in obs_lower:
+            if obs_raw and _descricao_e_ferias(obs_raw):
                 ferias_csv.append(ferias_csv_item)
                 
                 # Contar funcionarios com datas preenchidas
@@ -513,9 +522,8 @@ def gerar_csv_ferias():
             print(f"  Erro ao processar funcionario {funcionario_api.get('id', 'N/A')}: {e}")
     
     if not ferias_csv:
-        print("Nenhuma ferias foi convertida com sucesso")
-        print("Nota: Pode ser que nao existam ferias ativas no momento")
-        return None
+        print("Nenhuma ferias foi convertida com sucesso (sem registros ativos no momento).")
+        return []
     
     print(f"\n{len(ferias_csv)} ferias processadas!")
     print(f"   Todas com ID-AFASTAMENTO: 1011 (Ferias)")
@@ -628,8 +636,8 @@ def processar_integracao_completa():
     dados_ferias = gerar_csv_ferias()
     
     if not dados_ferias:
-        print("Falha na coleta de dados da API Alterdata")
-        return False
+        print("Nenhuma ferias ativa para exportar — integracao concluida sem envio.")
+        return True
     
     # Etapa 2: Processar usando a logica do integracao_folha_ponto.py
     sucesso = processar_modulo_ferias(
