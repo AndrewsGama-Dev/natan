@@ -37,8 +37,9 @@ try:
     import cargos
     import funcionarios
     import afastamentos
+    import ferias
     import demissoes
-    from config_reader import ler_config, ler_token_config
+    from config_reader import ler_config, ler_token_config, ler_modulos_habilitados
 except ImportError as e:
     print(f"❌ ERRO: Não foi possível importar um dos módulos necessários: {e}")
     print("📝 Certifique-se de que todos os arquivos estão no mesmo diretório:")
@@ -266,6 +267,36 @@ def gerar_relatorio_final(resultados):
         print(f"   Verifique as configurações e dependências.")
         return False
 
+def montar_sequencia_modulos():
+    """Monta a sequência de execução conforme [MODULOS] do .config."""
+    catalogo = [
+        ('empresas', empresas, 'Cadastro de Empresas'),
+        ('departamentos', departamentos, 'Cadastro de Departamentos'),
+        ('cargos', cargos, 'Cadastro de Cargos'),
+        ('funcionarios', funcionarios, 'Cadastro de Funcionários'),
+        ('afastamentos', afastamentos, 'Registro de Afastamentos'),
+        ('ferias', ferias, 'Registro de Férias'),
+        ('demissoes', demissoes, 'Processamento de Demissões'),
+    ]
+    flags = ler_modulos_habilitados()
+    sequencia = []
+    pulados = []
+
+    print("\n📋 MODULOS CONFIGURADOS (.config [MODULOS]):")
+    for nome, modulo, descricao in catalogo:
+        ativo = flags.get(nome, False)
+        status = "EXECUTAR" if ativo else "PULAR"
+        print(f"   {'✅' if ativo else '⏭️ '} {nome:<15} = {str(ativo).lower():<5} → {status}")
+        if ativo:
+            sequencia.append((nome, modulo, descricao))
+        else:
+            pulados.append(nome)
+
+    if pulados:
+        print(f"\n   Modulos desabilitados: {', '.join(pulados)}")
+
+    return sequencia
+
 def main():
     """Função principal do sistema"""
     try:
@@ -278,11 +309,12 @@ def main():
             return False
         
         # Configurar sequência de execução
-        sequencia_modulos = [
-            ('funcionarios', funcionarios, 'Cadastro de Funcionários'),
-            ('afastamentos', afastamentos, 'Registro de Afastamentos'),
-            ('demissoes', demissoes, 'Processamento de Demissões')
-        ]
+        sequencia_modulos = montar_sequencia_modulos()
+
+        if not sequencia_modulos:
+            print("\n❌ Nenhum modulo habilitado em [MODULOS] do .config.")
+            print("   Ative ao menos um modulo (ex.: funcionarios = true).")
+            return False
         
         print(f"\n🚀 INICIANDO INTEGRAÇÃO COMPLETA...")
         print(f"📊 Total de módulos a executar: {len(sequencia_modulos)}")

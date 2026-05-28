@@ -75,3 +75,41 @@ def ler_campo_chave_funcionarios():
     except Exception as e:
         print(f"❌ Erro ao ler campo_chave: {e}")
         return 'matricula'
+
+MODULOS_PADRAO = {
+    'empresas': False,
+    'departamentos': False,
+    'cargos': False,
+    'funcionarios': True,
+    'afastamentos': True,
+    'ferias': False,
+    'demissoes': True,
+}
+
+def _parse_bool_config(valor, padrao):
+    """Interpreta true/false do .config (true, false, 1, 0, sim, nao)."""
+    if valor is None:
+        return padrao
+    v = str(valor).strip().lower()
+    if v in ('true', '1', 'yes', 'sim', 's', 'on'):
+        return True
+    if v in ('false', '0', 'no', 'nao', 'não', 'n', 'off'):
+        return False
+    return padrao
+
+def ler_modulos_habilitados():
+    """
+    Lê a seção [MODULOS] do .config.
+    Chaves ausentes usam MODULOS_PADRAO. true = executa; false = ignora.
+    """
+    habilitados = dict(MODULOS_PADRAO)
+    try:
+        config = ler_config()
+        if config and 'MODULOS' in config:
+            for nome, padrao in MODULOS_PADRAO.items():
+                if nome in config['MODULOS']:
+                    habilitados[nome] = _parse_bool_config(config['MODULOS'][nome], padrao)
+        return habilitados
+    except Exception as e:
+        print(f"Erro ao ler secao [MODULOS]: {e} — usando padroes.")
+        return habilitados

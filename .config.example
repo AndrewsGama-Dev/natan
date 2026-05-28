@@ -31,3 +31,13 @@ senha = senha_soap
 [FUNCIONARIOS]
 # Campo chave para identificação: matricula ou cpf
 campo_chave = matricula
+
+[MODULOS]
+# Controle do integrador (main.py / integrador.sh): true = executa, false = pula
+empresas = false
+departamentos = false
+cargos = false
+funcionarios = true
+afastamentos = true
+ferias = false
+demissoes = true
