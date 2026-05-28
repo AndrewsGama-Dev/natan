@@ -53,6 +53,13 @@ except ImportError as e:
     print("   • .config")
     sys.exit(1)
 
+def _aguardar_tecla_se_interativo(mensagem=""):
+    """Evita travar o cron: input() só em terminal interativo."""
+    if mensagem:
+        print(mensagem)
+    if sys.stdin.isatty():
+        input("Pressione Enter para sair...")
+
 def imprimir_banner():
     """Imprime o banner inicial do sistema"""
     banner = """
@@ -305,7 +312,7 @@ def main():
         
         # Verificar pré-requisitos
         if not verificar_prerequisitos():
-            input("\n❌ Pressione Enter para sair...")
+            _aguardar_tecla_se_interativo("\n❌ Pré-requisitos não atendidos.")
             return False
         
         # Configurar sequência de execução
@@ -351,15 +358,14 @@ def main():
         
     except KeyboardInterrupt:
         print(f"\n\n⏹️  INTEGRAÇÃO INTERROMPIDA PELO USUÁRIO!")
-        print(f"   A execução foi cancelada manualmente.")
-        input(f"\n📋 Pressione Enter para sair...")
+        _aguardar_tecla_se_interativo()
         return False
         
     except Exception as e:
         print(f"\n💥 ERRO CRÍTICO NA EXECUÇÃO PRINCIPAL:")
         print(f"   Erro: {str(e)}")
         print(f"   Tipo: {type(e).__name__}")
-        input(f"\n❌ Pressione Enter para sair...")
+        _aguardar_tecla_se_interativo()
         return False
 
 if __name__ == "__main__":
