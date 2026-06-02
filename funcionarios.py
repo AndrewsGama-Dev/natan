@@ -4,11 +4,24 @@ import pandas as pd
 from datetime import datetime
 import time
 import hashlib
+import os
 import pytz
 import configparser
 import sys
 from urllib.parse import urljoin
 from config_reader import obter_headers_api, ler_token_config
+
+API_TIMEOUT_S = 30
+
+def _integracao_verbose():
+    """Menos log no cron/servidor; detalhe com INTEGRACAO_VERBOSE=1 ou terminal interativo."""
+    if os.environ.get('INTEGRACAO_VERBOSE', '').strip().lower() in ('1', 'true', 'yes', 'sim'):
+        return True
+    return sys.stdout.isatty()
+
+def _log_detalhe(mensagem):
+    if _integracao_verbose():
+        print(mensagem)
 
 def _resolver_link_paginacao(url_requisicao, next_link):
     """JSON:API: links.next pode ser URL absoluta ou relativa à requisição atual."""
@@ -117,7 +130,7 @@ def _coletar_funcionarios_paginado(headers, params, rotulo_coleta):
 
     return coletados
 
-def ler_campo_chave_config():
+def ler_campo_chave_config(silencioso=False):
     """
     Lê o campo_chave da seção [FUNCIONARIOS] do arquivo .config
     """
@@ -127,13 +140,16 @@ def ler_campo_chave_config():
         
         if 'FUNCIONARIOS' in config and 'campo_chave' in config['FUNCIONARIOS']:
             campo_chave = config['FUNCIONARIOS']['campo_chave'].strip()
-            print(f"Campo chave carregado do .config: {campo_chave}")
+            if not silencioso:
+                print(f"Campo chave carregado do .config: {campo_chave}")
             return campo_chave
         else:
-            print("Campo 'campo_chave' nao encontrado, usando padrao: 'matricula'")
+            if not silencioso:
+                print("Campo 'campo_chave' nao encontrado, usando padrao: 'matricula'")
             return 'matricula'
     except Exception as e:
-        print(f"Erro ao ler campo_chave: {e}")
+        if not silencioso:
+            print(f"Erro ao ler campo_chave: {e}")
         return 'matricula'
 
 def carregar_configuracoes_target():
@@ -223,16 +239,9 @@ def formatar_matricula_simples(matricula_original):
     Exemplo: matricula=2 -> 000002
     """
     try:
-        # Garantir que a matricula tenha 6 digitos com zeros a esquerda
-        matricula_6_digitos = str(matricula_original).zfill(6)
-        
-        print(f"    Matricula original: {matricula_original}")
-        print(f"    Matricula formatada: {matricula_6_digitos}")
-        
-        return matricula_6_digitos
-        
+        return str(matricula_original).zfill(6)
     except Exception as e:
-        print(f"    Erro ao formatar matricula: {e}")
+        _log_detalhe(f"    Erro ao formatar matricula: {e}")
         return str(matricula_original).zfill(6)
 
 def enviar_csv_para_api_target(nome_arquivo_csv):
@@ -397,19 +406,23 @@ def extrair_nome_limpo_cargo(nome_funcao):
     
     return nome_funcao.strip()
     
-def buscar_dados_departamento(funcionario_id, headers):
+def buscar_dados_departamento(funcionario_id, headers, cache=None, timeout=API_TIMEOUT_S):
     """
-    Busca informacoes do departamento do funcionario
+    Busca informacoes do departamento do funcionario (com cache por id API).
     """
+    if cache is not None and funcionario_id in cache:
+        return cache[funcionario_id]
+
+    resultado = None
     try:
-        # Primeira tentativa: buscar funcionario com include do departamento
-        url_funcionario = f"https://dp.pack.alterdata.com.br/api/v1/funcionarios/{funcionario_id}?include=departamento"
-        response = requests.get(url_funcionario, headers=headers)
+        url_funcionario = (
+            f"https://dp.pack.alterdata.com.br/api/v1/funcionarios/{funcionario_id}?include=departamento"
+        )
+        response = requests.get(url_funcionario, headers=headers, timeout=timeout)
         
         if response.status_code == 200:
             funcionario_data = response.json()
             
-            # Verificar se ha dados included (departamento)
             included = funcionario_data.get('included', [])
             for item in included:
                 if item.get('type') == 'departamentos':
@@ -420,76 +433,80 @@ def buscar_dados_departamento(funcionario_id, headers):
                     
                     codigo_final = extrair_codigo_departamento(externoid, nome, cei, item.get('id', ''))
                     
-                    return {
+                    resultado = {
                         'id': item.get('id', ''),
                         'codigo': codigo_final,
                         'nome': extrair_nome_limpo_departamento(nome),
                         'cei': cei
                     }
+                    break
             
-            # Se nao encontrou nos included, verificar relationships
-            data_list = funcionario_data.get('data', [])
-            if isinstance(data_list, list) and data_list:
-                relationships = data_list[0].get('relationships', {})
-            elif isinstance(data_list, dict):
-                relationships = data_list.get('relationships', {})
-            else:
-                relationships = {}
-                
-            departamento_rel = relationships.get('departamento', {})
-            departamento_data = departamento_rel.get('data')
-            
-            if departamento_data:
-                departamento_id = departamento_data.get('id')
-                if departamento_id:
-                    # Buscar departamento diretamente
-                    url_departamento = f"https://dp.pack.alterdata.com.br/api/v1/departamentos/{departamento_id}"
-                    dept_response = requests.get(url_departamento, headers=headers)
+            if resultado is None:
+                data_list = funcionario_data.get('data', [])
+                if isinstance(data_list, list) and data_list:
+                    relationships = data_list[0].get('relationships', {})
+                elif isinstance(data_list, dict):
+                    relationships = data_list.get('relationships', {})
+                else:
+                    relationships = {}
                     
-                    if dept_response.status_code == 200:
-                        dept_data = dept_response.json()
-                        dept_attributes = dept_data.get('data', {}).get('attributes', {})
+                departamento_rel = relationships.get('departamento', {})
+                departamento_data = departamento_rel.get('data')
+                
+                if departamento_data:
+                    departamento_id = departamento_data.get('id')
+                    if departamento_id:
+                        url_departamento = f"https://dp.pack.alterdata.com.br/api/v1/departamentos/{departamento_id}"
+                        dept_response = requests.get(url_departamento, headers=headers, timeout=timeout)
                         
-                        externoid = dept_attributes.get('externoid', '')
-                        nome = dept_attributes.get('nome', '')
-                        cei = dept_attributes.get('cei', '')
-                        
-                        codigo_final = extrair_codigo_departamento(externoid, nome, cei, departamento_id)
-                        
-                        return {
-                            'id': departamento_id,
-                            'codigo': codigo_final,
-                            'nome': extrair_nome_limpo_departamento(nome),
-                            'cei': cei
-                        }
+                        if dept_response.status_code == 200:
+                            dept_data = dept_response.json()
+                            dept_attributes = dept_data.get('data', {}).get('attributes', {})
+                            
+                            externoid = dept_attributes.get('externoid', '')
+                            nome = dept_attributes.get('nome', '')
+                            cei = dept_attributes.get('cei', '')
+                            
+                            codigo_final = extrair_codigo_departamento(externoid, nome, cei, departamento_id)
+                            
+                            resultado = {
+                                'id': departamento_id,
+                                'codigo': codigo_final,
+                                'nome': extrair_nome_limpo_departamento(nome),
+                                'cei': cei
+                            }
         
-        # Segunda tentativa: buscar departamento atraves do endpoint direto
-        url_departamento_funcionario = f"https://dp.pack.alterdata.com.br/api/v1/funcionarios/{funcionario_id}/departamento"
-        dept_response = requests.get(url_departamento_funcionario, headers=headers)
-        
-        if dept_response.status_code == 200:
-            dept_data = dept_response.json()
-            dept_info = dept_data.get('data', {})
-            if dept_info:
-                attributes = dept_info.get('attributes', {})
-                
-                externoid = attributes.get('externoid', '')
-                nome = attributes.get('nome', '')
-                cei = attributes.get('cei', '')
-                
-                codigo_final = extrair_codigo_departamento(externoid, nome, cei, dept_info.get('id', ''))
-                
-                return {
-                    'id': dept_info.get('id', ''),
-                    'codigo': codigo_final,
-                    'nome': extrair_nome_limpo_departamento(nome),
-                    'cei': cei
-                }
+        if resultado is None:
+            url_departamento_funcionario = (
+                f"https://dp.pack.alterdata.com.br/api/v1/funcionarios/{funcionario_id}/departamento"
+            )
+            dept_response = requests.get(url_departamento_funcionario, headers=headers, timeout=timeout)
+            
+            if dept_response.status_code == 200:
+                dept_data = dept_response.json()
+                dept_info = dept_data.get('data', {})
+                if dept_info:
+                    attributes = dept_info.get('attributes', {})
+                    
+                    externoid = attributes.get('externoid', '')
+                    nome = attributes.get('nome', '')
+                    cei = attributes.get('cei', '')
+                    
+                    codigo_final = extrair_codigo_departamento(externoid, nome, cei, dept_info.get('id', ''))
+                    
+                    resultado = {
+                        'id': dept_info.get('id', ''),
+                        'codigo': codigo_final,
+                        'nome': extrair_nome_limpo_departamento(nome),
+                        'cei': cei
+                    }
                         
     except Exception as e:
-        print(f"Erro ao buscar departamento do funcionario {funcionario_id}: {e}")
-    
-    return None
+        _log_detalhe(f"Erro ao buscar departamento do funcionario {funcionario_id}: {e}")
+
+    if cache is not None:
+        cache[funcionario_id] = resultado
+    return resultado
 
 def consultar_todos_funcionarios_para_csv():
     """
@@ -506,6 +523,7 @@ def consultar_todos_funcionarios_para_csv():
     params_base = {
         "sort": "codigo",
         "page[limit]": "100",
+        "fields": "codigo,nome,cpf,status,admissao,identidade,pis,email,rua,cidade,cep,nascimento,nomedamae,nomefuncao,salarioBase",
     }
     
     por_id = {}
@@ -549,43 +567,39 @@ def formatar_data_brasileira(data_iso):
     except Exception as e:
         return ""
 
-def mapear_funcionario_para_csv(funcionario_api, headers=None):
+def mapear_funcionario_para_csv(funcionario_api, headers=None, campo_chave=None, cache_departamentos=None):
     """
-    Mapeia um funcionario da API para o formato esperado no CSV com matricula simples (6 digitos)
+    Mapeia um funcionario da API para CSV. Chave de negocio: CPF (campo_chave do .config).
+    Matricula pode repetir entre empresas — cada vinculo (id API) gera uma linha.
     """
     attributes = funcionario_api.get('attributes', {})
     funcionario_id = funcionario_api.get('id', '')
     
-    # Ler campo_chave do .config
-    campo_chave = ler_campo_chave_config()
+    if campo_chave is None:
+        campo_chave = ler_campo_chave_config(silencioso=True)
     
-    # PRIMEIRO: Formatar CPF com 11 digitos (zeros a esquerda)
     cpf_formatado = formatar_cpf_11_digitos(attributes.get('cpf', ''))
+    if (campo_chave or '').strip().lower() == 'cpf' and not cpf_formatado:
+        return None
     
-    # SEGUNDO: Usar o campo 'codigo' dos atributos
     codigo_funcionario = attributes.get('codigo', '')
     if not codigo_funcionario:
-        # Fallback para o ID se nao tiver codigo
         codigo_funcionario = str(funcionario_id)
     
-    # TERCEIRO: Buscar dados do departamento
     departamento_info = None
-    
     if headers and funcionario_id:
-        departamento_info = buscar_dados_departamento(funcionario_id, headers)
+        departamento_info = buscar_dados_departamento(
+            funcionario_id, headers, cache=cache_departamentos
+        )
     
-    print(f"\nMapeando funcionario {codigo_funcionario}")
+    _log_detalhe(f"Mapeando id={funcionario_id} cpf={cpf_formatado} matricula={codigo_funcionario}")
     
-    # QUARTO: FORMATAR MATRICULA SIMPLES (6 digitos)
     matricula_simples = formatar_matricula_simples(codigo_funcionario)
-    
-    # QUINTO: Por enquanto sempre usar senha padrao
     senha_padrao = 'Natan123'
     
-    # SEXTO: Mapeamento dos campos do CSV
     email_api = attributes.get('email')
     email_normalizado = normalizar_email(email_api, cpf_formatado)
-    if str(email_api or '').strip().lower() == 'null':
+    if _integracao_verbose() and str(email_api or '').strip().lower() == 'null':
         print(f"    AVISO: email 'null' na API — usando: {email_normalizado}")
 
     funcionario_csv = {
@@ -675,23 +689,37 @@ def gerar_csv_funcionarios():
         print("Nenhum funcionario foi coletado da API")
         return
     
-    print(f"\nConvertendo {len(funcionarios_api)} funcionarios para formato CSV...")
+    campo_chave_cfg = ler_campo_chave_config()
+    
+    print(f"\nConvertendo {len(funcionarios_api)} vinculos (id API) para CSV — chave: {campo_chave_cfg}...")
     
     funcionarios_csv = []
     erros = []
+    sem_cpf = 0
+    cache_departamentos = {}
     
     for i, funcionario_api in enumerate(funcionarios_api, 1):
         try:
-            funcionario_csv = mapear_funcionario_para_csv(funcionario_api, headers)
+            funcionario_csv = mapear_funcionario_para_csv(
+                funcionario_api,
+                headers,
+                campo_chave=campo_chave_cfg,
+                cache_departamentos=cache_departamentos,
+            )
+            if funcionario_csv is None:
+                sem_cpf += 1
+                continue
             funcionarios_csv.append(funcionario_csv)
             
-            if i % 10 == 0:
-                print(f"  Processados {i}/{len(funcionarios_api)} funcionarios...")
-                time.sleep(0.5)
+            if i % 50 == 0 or i == len(funcionarios_api):
+                print(f"  Processados {i}/{len(funcionarios_api)} vinculos ({len(funcionarios_csv)} no CSV)...")
                 
         except Exception as e:
             erros.append({'id': funcionario_api.get('id', 'N/A'), 'erro': str(e)})
             print(f"  Erro ao processar funcionario {funcionario_api.get('id', 'N/A')}: {e}")
+    
+    if sem_cpf:
+        print(f"  Vinculos ignorados (sem CPF valido): {sem_cpf}")
     
     if not funcionarios_csv:
         print("Nenhum funcionario foi convertido com sucesso")
@@ -707,20 +735,19 @@ def gerar_csv_funcionarios():
         print(f"CSV gerado com sucesso: {nome_arquivo}")
         
         print(f"\nESTATISTICAS:")
-        print(f"  Total de funcionarios processados: {len(funcionarios_csv)}")
+        print(f"  Vinculos no CSV: {len(funcionarios_csv)}")
         print(f"  Erros de conversao: {len(erros)}")
         print(f"  Colunas no CSV: {len(df.columns)}")
         
-        print(f"\nPREVIEW DOS DADOS (primeiras 3 linhas):")
-        print(df.head(3).to_string())
-        
-        # Mostrar alguns registros
-        try:
-            print(f"\nREGISTROS GERADOS ({len(df)} total) - Primeiros 5:")
-            for i, row in df.head(5).iterrows():
-                print(f"   {row['nome']} - Matricula: {row['matricula']} - Campo Chave: {row['campo_chave']}")
-        except Exception as e:
-            print(f"Erro ao mostrar registros: {e}")
+        if _integracao_verbose():
+            print(f"\nPREVIEW DOS DADOS (primeiras 3 linhas):")
+            print(df.head(3).to_string())
+            try:
+                print(f"\nREGISTROS GERADOS ({len(df)} total) - Primeiros 5:")
+                for i, row in df.head(5).iterrows():
+                    print(f"   {row['nome']} | cpf={row['cpf']} | matricula={row['matricula']}")
+            except Exception as e:
+                print(f"Erro ao mostrar registros: {e}")
         
         return nome_arquivo
         

@@ -41,3 +41,6 @@ funcionarios = true
 afastamentos = true
 ferias = false
 demissoes = true
+
+# Logs: integrador.sh grava em logs/integrador_AAAAMMDD_HHMMSS.log
+# Symlink integrador.log aponta para o ultimo. Mantidos os 10 arquivos mais recentes.

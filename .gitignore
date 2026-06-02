@@ -22,6 +22,7 @@ relatorio_*.json
 relatorio_*.txt
 
 # Logs de integração
+logs/
 logs_demissao/
 *.log
 
