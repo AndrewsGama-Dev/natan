@@ -330,27 +330,32 @@ def enviar_csv_para_api_target(nome_arquivo_csv):
         print(f"ERRO na requisicao para API da Hevi: {e}")
         return False
 
-def buscar_dados_empresa(funcionario_id, headers):
+def _parse_empresa_api(empresa_info):
+    """Extrai codigo/nome da empresa retornada pela API (externoid = cod_empresa)."""
+    if not empresa_info:
+        return None
+    attributes = empresa_info.get('attributes', {})
+    codigo = attributes.get('externoid') or attributes.get('codigo') or empresa_info.get('id', '')
+    return {
+        'id': empresa_info.get('id', ''),
+        'codigo': str(codigo).strip(),
+        'nome': attributes.get('nome', ''),
+        'cnpj': attributes.get('cpfCnpjAlfanumerico') or str(attributes.get('cpfcnpj', '')),
+    }
+
+def buscar_dados_empresa(funcionario_id, headers, timeout=API_TIMEOUT_S):
     """
-    Busca informacoes da empresa do funcionario
+    Busca informacoes da empresa do funcionario.
     """
     try:
         url_empresa = f"https://dp.pack.alterdata.com.br/api/v1/funcionarios/{funcionario_id}/empresa"
-        response = requests.get(url_empresa, headers=headers)
+        response = requests.get(url_empresa, headers=headers, timeout=timeout)
         
         if response.status_code == 200:
             empresa_data = response.json()
-            empresa_info = empresa_data.get('data', {})
-            if empresa_info:
-                attributes = empresa_info.get('attributes', {})
-                return {
-                    'id': empresa_info.get('id', ''),
-                    'codigo': attributes.get('codigo', ''),
-                    'nome': attributes.get('nome', ''),
-                    'cnpj': attributes.get('cnpj', '')
-                }
+            return _parse_empresa_api(empresa_data.get('data', {}))
     except Exception as e:
-        pass
+        _log_detalhe(f"Erro ao buscar empresa do funcionario {funcionario_id}: {e}")
     
     return None
 
@@ -406,17 +411,19 @@ def extrair_nome_limpo_cargo(nome_funcao):
     
     return nome_funcao.strip()
     
-def buscar_dados_departamento(funcionario_id, headers, cache=None, timeout=API_TIMEOUT_S):
+def buscar_dados_vinculo(funcionario_id, headers, cache=None, timeout=API_TIMEOUT_S):
     """
-    Busca informacoes do departamento do funcionario (com cache por id API).
+    Busca departamento e empresa do funcionario (com cache por id API).
+    Usa include=departamento,empresa para evitar requisicoes extras.
     """
     if cache is not None and funcionario_id in cache:
         return cache[funcionario_id]
 
-    resultado = None
+    vinculo = {'departamento': None, 'empresa': None}
     try:
         url_funcionario = (
-            f"https://dp.pack.alterdata.com.br/api/v1/funcionarios/{funcionario_id}?include=departamento"
+            f"https://dp.pack.alterdata.com.br/api/v1/funcionarios/{funcionario_id}"
+            f"?include=departamento,empresa"
         )
         response = requests.get(url_funcionario, headers=headers, timeout=timeout)
         
@@ -425,7 +432,7 @@ def buscar_dados_departamento(funcionario_id, headers, cache=None, timeout=API_T
             
             included = funcionario_data.get('included', [])
             for item in included:
-                if item.get('type') == 'departamentos':
+                if item.get('type') == 'departamentos' and vinculo['departamento'] is None:
                     attributes = item.get('attributes', {})
                     externoid = attributes.get('externoid', '')
                     nome = attributes.get('nome', '')
@@ -433,15 +440,16 @@ def buscar_dados_departamento(funcionario_id, headers, cache=None, timeout=API_T
                     
                     codigo_final = extrair_codigo_departamento(externoid, nome, cei, item.get('id', ''))
                     
-                    resultado = {
+                    vinculo['departamento'] = {
                         'id': item.get('id', ''),
                         'codigo': codigo_final,
                         'nome': extrair_nome_limpo_departamento(nome),
                         'cei': cei
                     }
-                    break
+                elif item.get('type') == 'empresas' and vinculo['empresa'] is None:
+                    vinculo['empresa'] = _parse_empresa_api(item)
             
-            if resultado is None:
+            if vinculo['departamento'] is None:
                 data_list = funcionario_data.get('data', [])
                 if isinstance(data_list, list) and data_list:
                     relationships = data_list[0].get('relationships', {})
@@ -469,14 +477,14 @@ def buscar_dados_departamento(funcionario_id, headers, cache=None, timeout=API_T
                             
                             codigo_final = extrair_codigo_departamento(externoid, nome, cei, departamento_id)
                             
-                            resultado = {
+                            vinculo['departamento'] = {
                                 'id': departamento_id,
                                 'codigo': codigo_final,
                                 'nome': extrair_nome_limpo_departamento(nome),
                                 'cei': cei
                             }
         
-        if resultado is None:
+        if vinculo['departamento'] is None:
             url_departamento_funcionario = (
                 f"https://dp.pack.alterdata.com.br/api/v1/funcionarios/{funcionario_id}/departamento"
             )
@@ -494,19 +502,32 @@ def buscar_dados_departamento(funcionario_id, headers, cache=None, timeout=API_T
                     
                     codigo_final = extrair_codigo_departamento(externoid, nome, cei, dept_info.get('id', ''))
                     
-                    resultado = {
+                    vinculo['departamento'] = {
                         'id': dept_info.get('id', ''),
                         'codigo': codigo_final,
                         'nome': extrair_nome_limpo_departamento(nome),
                         'cei': cei
                     }
+
+        if vinculo['empresa'] is None:
+            vinculo['empresa'] = buscar_dados_empresa(funcionario_id, headers, timeout=timeout)
                         
     except Exception as e:
-        _log_detalhe(f"Erro ao buscar departamento do funcionario {funcionario_id}: {e}")
+        _log_detalhe(f"Erro ao buscar vinculo do funcionario {funcionario_id}: {e}")
 
     if cache is not None:
-        cache[funcionario_id] = resultado
-    return resultado
+        cache[funcionario_id] = vinculo
+    return vinculo
+
+def buscar_dados_departamento(funcionario_id, headers, cache=None, timeout=API_TIMEOUT_S):
+    """Compatibilidade: retorna apenas departamento."""
+    if cache is not None and funcionario_id in cache:
+        cached = cache[funcionario_id]
+        if isinstance(cached, dict) and 'departamento' in cached:
+            return cached['departamento']
+        return cached
+    vinculo = buscar_dados_vinculo(funcionario_id, headers, cache=cache, timeout=timeout)
+    return vinculo.get('departamento')
 
 def consultar_todos_funcionarios_para_csv():
     """
@@ -567,7 +588,7 @@ def formatar_data_brasileira(data_iso):
     except Exception as e:
         return ""
 
-def mapear_funcionario_para_csv(funcionario_api, headers=None, campo_chave=None, cache_departamentos=None):
+def mapear_funcionario_para_csv(funcionario_api, headers=None, campo_chave=None, cache_vinculos=None):
     """
     Mapeia um funcionario da API para CSV. Chave de negocio: CPF (campo_chave do .config).
     Matricula pode repetir entre empresas — cada vinculo (id API) gera uma linha.
@@ -587,10 +608,13 @@ def mapear_funcionario_para_csv(funcionario_api, headers=None, campo_chave=None,
         codigo_funcionario = str(funcionario_id)
     
     departamento_info = None
+    empresa_info = None
     if headers and funcionario_id:
-        departamento_info = buscar_dados_departamento(
-            funcionario_id, headers, cache=cache_departamentos
+        vinculo = buscar_dados_vinculo(
+            funcionario_id, headers, cache=cache_vinculos
         )
+        departamento_info = vinculo.get('departamento')
+        empresa_info = vinculo.get('empresa')
     
     _log_detalhe(f"Mapeando id={funcionario_id} cpf={cpf_formatado} matricula={codigo_funcionario}")
     
@@ -644,7 +668,8 @@ def mapear_funcionario_para_csv(funcionario_api, headers=None, campo_chave=None,
         'cod_escala_padrao': '',
         'codigo_escala': '',
         'dtinicio_escala': '',
-        'empresa': '',
+        'cod_empresa': empresa_info.get('codigo', '') if empresa_info else '',
+        'empresa': empresa_info.get('nome', '') if empresa_info else '',
         'nome_funcao': extrair_nome_limpo_cargo(attributes.get('nomefuncao', '')),
         'codigo_legado_funcao': '',  # Sera preenchido abaixo
         'nro_centro_custo': departamento_info.get('id', '') if departamento_info else '',
@@ -696,7 +721,7 @@ def gerar_csv_funcionarios():
     funcionarios_csv = []
     erros = []
     sem_cpf = 0
-    cache_departamentos = {}
+    cache_vinculos = {}
     
     for i, funcionario_api in enumerate(funcionarios_api, 1):
         try:
@@ -704,7 +729,7 @@ def gerar_csv_funcionarios():
                 funcionario_api,
                 headers,
                 campo_chave=campo_chave_cfg,
-                cache_departamentos=cache_departamentos,
+                cache_vinculos=cache_vinculos,
             )
             if funcionario_csv is None:
                 sem_cpf += 1
