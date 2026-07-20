@@ -32,6 +32,13 @@ senha = senha_soap
 # Campo chave para identificação: matricula ou cpf
 campo_chave = matricula
 
+# Troca cod_empresa da API pelo codigo enviado no CSV (IFPonto).
+# Formato: codigo_na_api = codigo_no_csv
+# Aceita 10, 00010 etc. para o mesmo codigo da Alterdata (externoid).
+[MAPEAMENTO_COD_EMPRESA]
+# 00010 = 12
+# 10 = 12
+
 [MODULOS]
 # Controle do integrador (main.py / integrador.sh): true = executa, false = pula
 empresas = false

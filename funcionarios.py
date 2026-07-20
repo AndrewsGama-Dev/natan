@@ -9,7 +9,7 @@ import pytz
 import configparser
 import sys
 from urllib.parse import urljoin
-from config_reader import obter_headers_api, ler_token_config
+from config_reader import obter_headers_api, ler_token_config, ler_mapeamento_cod_empresa, aplicar_mapeamento_cod_empresa
 
 API_TIMEOUT_S = 30
 
@@ -588,7 +588,7 @@ def formatar_data_brasileira(data_iso):
     except Exception as e:
         return ""
 
-def mapear_funcionario_para_csv(funcionario_api, headers=None, campo_chave=None, cache_vinculos=None):
+def mapear_funcionario_para_csv(funcionario_api, headers=None, campo_chave=None, cache_vinculos=None, mapa_cod_empresa=None):
     """
     Mapeia um funcionario da API para CSV. Chave de negocio: CPF (campo_chave do .config).
     Matricula pode repetir entre empresas — cada vinculo (id API) gera uma linha.
@@ -620,6 +620,11 @@ def mapear_funcionario_para_csv(funcionario_api, headers=None, campo_chave=None,
     
     matricula_simples = formatar_matricula_simples(codigo_funcionario)
     senha_padrao = 'Natan123'
+
+    cod_empresa_api = empresa_info.get('codigo', '') if empresa_info else ''
+    cod_empresa_csv = aplicar_mapeamento_cod_empresa(cod_empresa_api, mapa_cod_empresa or {})
+    if _integracao_verbose() and cod_empresa_api and cod_empresa_csv != cod_empresa_api:
+        _log_detalhe(f"    cod_empresa mapeado: {cod_empresa_api} -> {cod_empresa_csv}")
     
     email_api = attributes.get('email')
     email_normalizado = normalizar_email(email_api, cpf_formatado)
@@ -668,7 +673,7 @@ def mapear_funcionario_para_csv(funcionario_api, headers=None, campo_chave=None,
         'cod_escala_padrao': '',
         'codigo_escala': '',
         'dtinicio_escala': '',
-        'cod_empresa': empresa_info.get('codigo', '') if empresa_info else '',
+        'cod_empresa': cod_empresa_csv,
         'empresa': empresa_info.get('nome', '') if empresa_info else '',
         'nome_funcao': extrair_nome_limpo_cargo(attributes.get('nomefuncao', '')),
         'codigo_legado_funcao': '',  # Sera preenchido abaixo
@@ -715,6 +720,9 @@ def gerar_csv_funcionarios():
         return
     
     campo_chave_cfg = ler_campo_chave_config()
+    mapa_cod_empresa = ler_mapeamento_cod_empresa()
+    if mapa_cod_empresa:
+        print(f"Mapeamento cod_empresa: {len(mapa_cod_empresa)} chave(s) em [MAPEAMENTO_COD_EMPRESA]")
     
     print(f"\nConvertendo {len(funcionarios_api)} vinculos (id API) para CSV — chave: {campo_chave_cfg}...")
     
@@ -730,6 +738,7 @@ def gerar_csv_funcionarios():
                 headers,
                 campo_chave=campo_chave_cfg,
                 cache_vinculos=cache_vinculos,
+                mapa_cod_empresa=mapa_cod_empresa,
             )
             if funcionario_csv is None:
                 sem_cpf += 1
