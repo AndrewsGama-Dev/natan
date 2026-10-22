@@ -194,6 +194,32 @@ def pausar_entre_modulos(segundos=3):
         time.sleep(1)
     print("   ✅ Continuando...                    ")
 
+MAX_RELATORIOS_INTEGRACAO = 30
+
+def limpar_relatorios_antigos(manter=MAX_RELATORIOS_INTEGRACAO):
+    """Mantém só os N arquivos relatorio_integracao_*.json mais recentes."""
+    try:
+        arquivos = [
+            nome for nome in os.listdir('.')
+            if nome.startswith('relatorio_integracao_') and nome.endswith('.json')
+        ]
+        arquivos.sort(reverse=True)
+        removidos = 0
+        for nome in arquivos[manter:]:
+            try:
+                os.remove(nome)
+                removidos += 1
+            except OSError as e:
+                print(f"⚠️  Não foi possível apagar {nome}: {e}")
+        total = len(arquivos)
+        mantidos = min(total, manter)
+        if removidos:
+            print(f"🧹 Relatórios antigos removidos: {removidos} (mantidos {mantidos}/{manter})")
+        else:
+            print(f"🧹 Relatórios de integração: {mantidos} arquivo(s) (limite {manter})")
+    except Exception as e:
+        print(f"⚠️  Falha ao limpar relatórios antigos: {e}")
+
 def gerar_relatorio_final(resultados):
     """Gera relatório final da execução"""
     print(f"\n{'='*80}")
@@ -238,6 +264,7 @@ def gerar_relatorio_final(resultados):
         with open(nome_arquivo_relatorio, 'w', encoding='utf-8') as f:
             json.dump(relatorio_detalhado, f, indent=2, ensure_ascii=False)
         print(f"\n💾 Relatório detalhado salvo em: {nome_arquivo_relatorio}")
+        limpar_relatorios_antigos()
     except Exception as e:
         print(f"\n⚠️  Erro ao salvar relatório: {e}")
     
