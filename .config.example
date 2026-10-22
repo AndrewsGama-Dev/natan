@@ -39,6 +39,13 @@ campo_chave = matricula
 # 00010 = 12
 # 10 = 12
 
+[DEMISSOES]
+# So entram demissoes com data maior ou igual a esta (DD/MM/AAAA ou AAAA-MM-DD).
+data_inicial = 01/09/2026
+# true = nao reenvia CPF que ja esta em demissoes_cpf_processados.txt
+# false = envia de novo todas as demissoes a partir de data_inicial
+filtrar_cpf_processados = true
+
 [MODULOS]
 # Controle do integrador (main.py / integrador.sh): true = executa, false = pula
 empresas = false

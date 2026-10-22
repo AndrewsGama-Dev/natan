@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import time
 import os
 
-from config_reader import obter_headers_api, ler_token_config, ler_config
+from config_reader import obter_headers_api, ler_token_config, ler_config, _parse_bool_config
 from funcionarios import (
     formatar_cpf_11_digitos,
     formatar_matricula_simples,
@@ -77,6 +77,43 @@ def registrar_cpfs_demissoes_processados(cpfs_novos):
         )
     except OSError as e:
         print(f"ERRO ao gravar historico de CPFs: {e}")
+
+
+def _parse_data_config(valor, padrao):
+    """Aceita DD/MM/AAAA ou AAAA-MM-DD. Retorna datetime naive."""
+    bruto = str(valor or '').strip().strip('"').strip("'")
+    if not bruto:
+        return padrao
+    for fmt in ('%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y'):
+        try:
+            return datetime.strptime(bruto, fmt)
+        except ValueError:
+            continue
+    print(f"AVISO: data_inicial invalida ({bruto!r}). Usando {padrao.strftime('%d/%m/%Y')}.")
+    return padrao
+
+
+def ler_opcoes_demissoes():
+    """
+    [DEMISSOES] no .config:
+      data_inicial = 01/09/2026
+      filtrar_cpf_processados = true|false
+    """
+    data_padrao = datetime(2025, 1, 1)
+    opcoes = {
+        'data_inicial': data_padrao,
+        'filtrar_cpf_processados': True,
+    }
+    cfg = ler_config()
+    secao = (cfg or {}).get('DEMISSOES') or {}
+    if not secao:
+        return opcoes
+    opcoes['data_inicial'] = _parse_data_config(secao.get('data_inicial'), data_padrao)
+    if 'filtrar_cpf_processados' in secao:
+        opcoes['filtrar_cpf_processados'] = _parse_bool_config(
+            secao.get('filtrar_cpf_processados'), True
+        )
+    return opcoes
 
 
 def ler_pag_demissao_rest():
@@ -398,20 +435,30 @@ def gerar_csv_demissoes():
         print("Nenhum funcionario demitido foi coletado da API")
         return None
     
-    cpfs_ja_exportados = carregar_cpfs_demissoes_processados()
-    print(
-        f"\nHistorico de CPF ja processados ({ARQUIVO_HISTORICO_CPF_DEMISSOES}): "
-        f"{len(cpfs_ja_exportados)} CPF(s). Para reprocessar, remova linha(s) desse arquivo."
-    )
+    opcoes = ler_opcoes_demissoes()
+    data_inicial = opcoes['data_inicial']
+    filtrar_historico = opcoes['filtrar_cpf_processados']
+    data_inicial_txt = data_inicial.strftime('%d/%m/%Y')
+    data_inicial_iso = data_inicial.strftime('%Y-%m-%d')
+
+    if filtrar_historico:
+        cpfs_ja_exportados = carregar_cpfs_demissoes_processados()
+        print(
+            f"\nFiltro de CPF processados: LIGADO ({ARQUIVO_HISTORICO_CPF_DEMISSOES}: "
+            f"{len(cpfs_ja_exportados)} CPF(s))."
+        )
+    else:
+        cpfs_ja_exportados = set()
+        print(
+            f"\nFiltro de CPF processados: DESLIGADO. "
+            f"Demissoes a partir de {data_inicial_txt} serao enviadas mesmo se o CPF ja constar no historico."
+        )
     
-    # Filtrar demissoes recentes (desde janeiro de 2025)
-    demissoes_filtradas = filtrar_demissoes_recentes(funcionarios_demitidos, '2025-01-01')
-    print(f"Demissoes filtradas desde 01/01/2025: {len(demissoes_filtradas)}")
+    demissoes_filtradas = filtrar_demissoes_recentes(funcionarios_demitidos, data_inicial_iso)
+    print(f"Demissoes filtradas desde {data_inicial_txt}: {len(demissoes_filtradas)}")
     
     if not demissoes_filtradas:
-        print("Nenhuma demissao recente encontrada")
-        print("Tentando processar todas as demissoes disponiveis...")
-        demissoes_filtradas = funcionarios_demitidos
+        print(f"Nenhuma demissao a partir de {data_inicial_txt}. CSV ficara somente com cabecalho.")
     
     print(f"\nConvertendo {len(demissoes_filtradas)} demissoes (depois sera aplicado filtro de historico)...")
     campo_chave_cfg = ler_campo_chave_config()
@@ -430,11 +477,10 @@ def gerar_csv_demissoes():
             attrs = funcionario_demitido.get("attributes", {})
             cpf_digitos = formatar_cpf_11_digitos(attrs.get("cpf", ""))
 
-            if len(cpf_digitos) == 11:
-                if cpf_digitos in cpfs_ja_exportados:
-                    ignorados_historico += 1
-                    continue
-            else:
+            if filtrar_historico and len(cpf_digitos) == 11 and cpf_digitos in cpfs_ja_exportados:
+                ignorados_historico += 1
+                continue
+            if len(cpf_digitos) != 11:
                 sem_cpf_valido_para_historico += 1
 
             demissao_csv = mapear_demissao_para_csv(funcionario_demitido, campo_chave_cfg)
@@ -453,7 +499,10 @@ def gerar_csv_demissoes():
             erros.append({'id': funcionario_demitido.get('id', 'N/A'), 'erro': str(e)})
             print(f"  Erro ao processar funcionario {funcionario_demitido.get('id', 'N/A')}: {e}")
     
-    print(f"\nFiltro de historico: {ignorados_historico} ignorado(s) (CPF ja em {ARQUIVO_HISTORICO_CPF_DEMISSOES}).")
+    if filtrar_historico:
+        print(f"\nFiltro de historico: {ignorados_historico} ignorado(s) (CPF ja em {ARQUIVO_HISTORICO_CPF_DEMISSOES}).")
+    else:
+        print("\nFiltro de historico desligado: nenhum CPF foi ignorado por ja ter sido processado.")
     if sem_cpf_valido_para_historico:
         print(f"   Registro(s) sem CPF de 11 digitos na API: {sem_cpf_valido_para_historico} (nao deduplicados pelo historico).")
 
