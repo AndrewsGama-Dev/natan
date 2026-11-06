@@ -7,6 +7,7 @@ import os
 
 from config_reader import obter_headers_api, ler_token_config, ler_config, _parse_bool_config
 from funcionarios import (
+    _coletar_funcionarios_paginado,
     formatar_cpf_11_digitos,
     formatar_matricula_simples,
     ler_campo_chave_config,
@@ -270,6 +271,29 @@ def consultar_funcionarios_demitidos():
     print(f"\nTotal coletado: {len(todos_demitidos)} funcionarios demitidos")
     return todos_demitidos, headers
 
+
+def coletar_cpfs_com_vinculo_aberto(headers):
+    """
+    CPFs com vinculo Ativo ou Afastado em qualquer empresa.
+    Demissao numa empresa e admissao em outra e transferencia: o CPF continua aberto.
+    """
+    print("\nConferindo CPFs ainda ativos ou afastados em alguma empresa...")
+    cpfs = set()
+    params_base = {
+        "sort": "codigo",
+        "page[limit]": "100",
+        "fields": "codigo,nome,cpf,status",
+    }
+    for status in ("ativo", "afastado"):
+        params = {**params_base, "filter[status]": status}
+        lote = _coletar_funcionarios_paginado(headers, params, f"VINCULO-{status.upper()}")
+        for funcionario in lote:
+            cpf = formatar_cpf_11_digitos((funcionario.get("attributes") or {}).get("cpf", ""))
+            if len(cpf) == 11:
+                cpfs.add(cpf)
+    print(f"CPFs com vinculo aberto (ativo ou afastado): {len(cpfs)}")
+    return cpfs
+
 def formatar_data_brasileira(data_iso):
     """
     Converte data ISO para formato brasileiro DD/MM/AAAA
@@ -407,8 +431,9 @@ def filtrar_demissoes_recentes(funcionarios_demitidos, data_limite='2025-01-01')
 
 def gerar_csv_demissoes():
     """
-    Gera demissoes_api.csv apenas com demissoes cujo CPF ainda nao consta em
-    demissoes_cpf_processados.txt (caso tipico aprendiz demitido e readmitido).
+    Gera demissoes_api.csv apenas com demissao real.
+    CPF ainda ativo ou afastado em qualquer empresa e transferencia e fica de fora.
+    Com o filtro ligado, CPF que ja consta em demissoes_cpf_processados.txt tambem fica de fora.
 
     Sem CPF valido na API: nao entra na deduplicacao por historico — linha vai para o CSV.
     Ao gravar CSV com sucesso: CPFs exportados novos passam para o arquivo de historico.
@@ -429,7 +454,7 @@ def gerar_csv_demissoes():
         return None
     
     # Coletar funcionarios demitidos da API (ENDPOINT CORRETO)
-    funcionarios_demitidos, _ = consultar_funcionarios_demitidos()
+    funcionarios_demitidos, headers = consultar_funcionarios_demitidos()
     
     if not funcionarios_demitidos:
         print("Nenhum funcionario demitido foi coletado da API")
@@ -460,7 +485,9 @@ def gerar_csv_demissoes():
     if not demissoes_filtradas:
         print(f"Nenhuma demissao a partir de {data_inicial_txt}. CSV ficara somente com cabecalho.")
     
-    print(f"\nConvertendo {len(demissoes_filtradas)} demissoes (depois sera aplicado filtro de historico)...")
+    cpfs_vinculo_aberto = coletar_cpfs_com_vinculo_aberto(headers) if headers else set()
+
+    print(f"\nConvertendo {len(demissoes_filtradas)} demissoes (historico e vinculo aberto)...")
     campo_chave_cfg = ler_campo_chave_config()
     print(f"   Matricula no CSV: codigo Alterdata (6 digitos) | campo_chave .config: {campo_chave_cfg}")
     
@@ -470,6 +497,7 @@ def gerar_csv_demissoes():
     erros = []
     funcionarios_processados = set()
     ignorados_historico = 0
+    ignorados_transferencia = 0
     sem_cpf_valido_para_historico = 0
     
     for i, funcionario_demitido in enumerate(demissoes_filtradas, 1):
@@ -479,6 +507,9 @@ def gerar_csv_demissoes():
 
             if filtrar_historico and len(cpf_digitos) == 11 and cpf_digitos in cpfs_ja_exportados:
                 ignorados_historico += 1
+                continue
+            if len(cpf_digitos) == 11 and cpf_digitos in cpfs_vinculo_aberto:
+                ignorados_transferencia += 1
                 continue
             if len(cpf_digitos) != 11:
                 sem_cpf_valido_para_historico += 1
@@ -503,6 +534,10 @@ def gerar_csv_demissoes():
         print(f"\nFiltro de historico: {ignorados_historico} ignorado(s) (CPF ja em {ARQUIVO_HISTORICO_CPF_DEMISSOES}).")
     else:
         print("\nFiltro de historico desligado: nenhum CPF foi ignorado por ja ter sido processado.")
+    print(
+        f"Transferencia ignorada: {ignorados_transferencia} "
+        f"(CPF ainda ativo ou afastado em alguma empresa)."
+    )
     if sem_cpf_valido_para_historico:
         print(f"   Registro(s) sem CPF de 11 digitos na API: {sem_cpf_valido_para_historico} (nao deduplicados pelo historico).")
 
